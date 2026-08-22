@@ -1,112 +1,171 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type {
   BulkDeleteProductsDTO,
   BulkRestockProductDTO,
   ChangePriceProductDTO,
   CreateProductDTO,
+  Product,
   ReduceStockProductDTO,
   RestockProductDTO,
   UpdateProductDTO,
 } from "../models/product.model.js";
 import { productService } from "../services/product.service.js";
+import { StatusCodes } from "http-status-codes";
+import { sendResponse } from "../utils/response.util.js";
 
 export const productController = {
-  getAll: async (req: Request, res: Response) => {
-    const minPrice = req.query.minPrice
-      ? Number(req.query.minPrice)
-      : undefined;
-    const maxPrice = req.query.maxPrice
-      ? Number(req.query.maxPrice)
-      : undefined;
+  getAll: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const minPrice = req.query.minPrice
+        ? Number(req.query.minPrice)
+        : undefined;
+      const maxPrice = req.query.maxPrice
+        ? Number(req.query.maxPrice)
+        : undefined;
 
-    const result = await productService.getAll({ minPrice, maxPrice });
+      const result = await productService.getAll({ minPrice, maxPrice });
 
-    res.json(result);
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: "Daftar Produk berhasil di ambil",
+        data: result.data,
+        meta: result.meta,
+      });
+    } catch (err) {
+      next(err);
+    }
   },
 
-  getById: async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const result = await productService.getById(id);
+  getById: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      const result = await productService.getById(id);
 
-    res.json(result);
+      sendResponse<Product>(res, StatusCodes.OK, "Berhasil memuat data produk", result)
+    } catch (err) {
+      next(err)
+    }
   },
 
-  getLowStock: async (req: Request, res: Response) => {
-    const result = await productService.getLowStock();
+  getLowStock: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await productService.getLowStock();
 
-    res.json(result);
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: "Berhasil memuat data produk dengan stok menipis",
+        data: result
+      })
+    } catch (err) {
+      next(err)
+    }
   },
 
-  getHighStock: async (req: Request, res: Response) => {
-    const result = await productService.getHighStock();
+  getHighStock: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await productService.getHighStock();
 
-    res.json(result);
+      sendResponse<Product[]>(res, StatusCodes.OK, "Berhasil memuat data produk dengan stok banyak", result)
+    } catch (err) {
+      next(err)
+    }
   },
 
-  create: async (req: Request, res: Response) => {
-    const payload: CreateProductDTO = req.body;
+  create: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payload: CreateProductDTO = req.body;
+      const result = await productService.create(payload);
 
-    const result = await productService.create(payload);
-
-    res.json(result);
+      sendResponse<Product>(res, StatusCodes.CREATED, "Berhasil menambahkan produk baru", result)
+    } catch (err) {
+      next(err)
+    }
   },
 
-  updateById: async (req: Request, res: Response) => {
-    const id: number = Number(req.params.id);
-    const payload: UpdateProductDTO = req.body;
+  updateById: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id: number = Number(req.params.id);
+      const payload: UpdateProductDTO = req.body;
 
-    const result = await productService.updateById(id, payload);
+      await productService.updateById(id, payload);
 
-    res.json(result);
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil memperbarui produk")
+    } catch (err) {
+      next(err)
+    }
   },
 
-  changePrice: async (req: Request, res: Response) => {
-    const id: number = Number(req.params.id);
-    const payload: ChangePriceProductDTO = req.body;
+  changePrice: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id: number = Number(req.params.id);
+      const payload: ChangePriceProductDTO = req.body;
 
-    const result = await productService.changePrice(id, payload);
+      await productService.changePrice(id, payload);
 
-    res.json(result);
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil memperbarui harga produk")
+    } catch (err) {
+      next(err)
+    }
   },
 
-  restock: async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const payload: RestockProductDTO = req.body;
+  restock: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      const payload: RestockProductDTO = req.body;
 
-    const result = await productService.restock(id, payload);
+      await productService.restock(id, payload);
 
-    res.json(result);
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil menambah stok produk")
+    } catch (err) {
+      next(err)
+    }
   },
 
-  reduceStock: async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const payload: ReduceStockProductDTO = req.body;
+  reduceStock: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      const payload: ReduceStockProductDTO = req.body;
 
-    const result = await productService.reduceStock(id, payload);
+      await productService.reduceStock(id, payload);
 
-    res.json(result);
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil mengurangi stok produk")
+    } catch (err) {
+      next(err)
+    }
   },
 
-  bulkRestock: async (req: Request, res: Response) => {
-    const payload: BulkRestockProductDTO = req.body
+  bulkRestock: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payload: BulkRestockProductDTO = req.body;
 
-    const result = await productService.bulkRestock(payload)
+      await productService.bulkRestock(payload);
 
-    res.json(result)
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil menambah stok beberapa produk")
+    } catch (err) {
+      next(err)
+    }
   },
 
-  deleteById: async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const result = await productService.deleteById(id);
+  deleteById: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      await productService.deleteById(id);
 
-    res.json(result);
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil menghapus produk dari sistem")
+    } catch (err) {
+      next(err)
+    }
   },
 
-  bulkDelete: async (req: Request, res: Response) => {
-    const ids: BulkDeleteProductsDTO = req.body
+  bulkDelete: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const ids: BulkDeleteProductsDTO = req.body;
 
-    const result = await productService.bulkDelete(ids)
+      const result = await productService.bulkDelete(ids);
 
-    res.json(result)
-  }
+      sendResponse<void>(res, StatusCodes.OK, `Berhasil menghapus sebanyak ${result} produk dari sistem`)
+    } catch (err) {
+      next(err)
+    }
+  },
 };

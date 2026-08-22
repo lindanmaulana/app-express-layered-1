@@ -79,7 +79,7 @@ export const productService = {
     if (product)
       throw new ConflictError(`Produk dengan SKU '${dto.sku}' sudah terdaftar`);
 
-    const result = await productRepository.create(dto);
+    const result = await productRepository.create({...dto, stock: dto.stock ?? 0});
 
     return result;
   },

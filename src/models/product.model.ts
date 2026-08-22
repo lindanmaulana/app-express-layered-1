@@ -1,4 +1,4 @@
-import type { PaginationMeta } from "./pagination.model.js";
+import type { PaginationMeta } from "../types/api.type.js";
 
 export type Product = {
   id: number;
@@ -30,7 +30,9 @@ export type PaginatedProductsResult = {
   meta: PaginationMeta;
 };
 
-export type CreateProductDTO = Omit<Product, "id" | "created_at">;
+export type CreateProductDTO = Omit<Product, "id" | "created_at"> & {
+  stock?: number | undefined;
+};
 
 export type UpdateProductDTO = Partial<Omit<Product, "id" | "created_at">>;
 

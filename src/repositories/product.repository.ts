@@ -6,7 +6,7 @@ import type {
   ProductFilterParams,
   ReduceStockProductDTO,
   RestockProductDTO,
-  UpdateProductDTO
+  UpdateProductDTO,
 } from "../models/product.model.js";
 
 export const productRepository = {
@@ -29,7 +29,8 @@ export const productRepository = {
       conditions.push(`price <= $${params.length}`);
     }
 
-    const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereSQL =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     return { whereSQL, params };
   },
@@ -113,6 +114,9 @@ export const productRepository = {
   create: async (dto: CreateProductDTO): Promise<Product> => {
     const query =
       "INSERT INTO products (name, sku, price, stock) VALUES ($1, $2, $3, $4) RETURNING *";
+
+    console.log({ dto, query });
+    
     const result = await pool.query<Product>(query, [
       dto.name,
       dto.sku,
