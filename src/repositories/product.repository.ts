@@ -29,8 +29,7 @@ export const productRepository = {
       conditions.push(`price <= $${params.length}`);
     }
 
-    const whereSQL =
-      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     return { whereSQL, params };
   },

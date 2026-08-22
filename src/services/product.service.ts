@@ -1,4 +1,6 @@
 import pool from "../config/db.js";
+import { BadRequestError, ConflictError, InternalServerError, NotFoundError } from "../errors/index.js";
+
 import type {
   BulkDeleteProductsDTO,
   BulkRestockProductDTO,
@@ -46,7 +48,7 @@ export const productService = {
   getById: async (id: number): Promise<Product> => {
     const result = await productRepository.findById(id);
 
-    if (!result) throw new Error("Product not found");
+    if (!result) throw new NotFoundError("Produk tidak tersedia");
 
     return result;
   },
@@ -54,7 +56,8 @@ export const productService = {
   getBySku: async (sku: string): Promise<Product> => {
     const result = await productRepository.findBySku(sku);
 
-    if (!result) throw new Error("Sku not found");
+    if (!result)
+      throw new NotFoundError(`Produk dengan SKU ${sku} tidak tersedia`);
 
     return result;
   },
@@ -73,7 +76,8 @@ export const productService = {
 
   create: async (dto: CreateProductDTO): Promise<Product> => {
     const product = await productRepository.existsBySku(dto.sku);
-    if (product) throw new Error("SKU is taken.");
+    if (product)
+      throw new ConflictError(`Produk dengan SKU '${dto.sku}' sudah terdaftar`);
 
     const result = await productRepository.create(dto);
 
@@ -82,7 +86,7 @@ export const productService = {
 
   updateById: async (id: number, dto: UpdateProductDTO): Promise<void> => {
     const product = await productRepository.findById(id);
-    if (!product) throw new Error("Product not found");
+    if (!product) throw new NotFoundError("Produk tidak tersedia");
 
     if (dto.sku) {
       const isSkuTaken = await productRepository.existsBySkuExcludeId(
@@ -90,41 +94,51 @@ export const productService = {
         dto.sku,
       );
 
-      if (isSkuTaken) throw new Error("Sku sudah digunakan oleh produk lain");
+      if (isSkuTaken)
+        throw new ConflictError(
+          `Produk dengan SKU '${dto.sku} sudah terdaftar'`,
+        );
     }
 
     const result = await productRepository.updateById(id, dto);
     if (!result)
-      throw new Error("Gagal memperbarui produk, silahkan coba lagi");
+      throw new InternalServerError(
+        "Gagal memperbarui produk, silahkan coba lagi",
+      );
   },
 
   changePrice: async (
     id: number,
     dto: ChangePriceProductDTO,
   ): Promise<void> => {
-    if (dto.amount <= 0) throw new Error("Harga produk baru tidak valid");
+    if (dto.amount <= 0)
+      throw new BadRequestError("Harga produk baru tidak valid");
 
     const product = await productRepository.findById(id);
-    if (!product) throw new Error("Produk tidak ditemukan");
+    if (!product) throw new NotFoundError("Produk tidak ditemukan");
 
     if (Number(product.price) === dto.amount)
-      throw new Error("Harga baru tidak boleh sama dengan harga saat ini");
+      throw new BadRequestError(
+        "Harga baru tidak boleh sama dengan harga saat ini",
+      );
 
     const result = await productRepository.updatePrice(id, dto);
     if (!result)
-      throw new Error("Gagal memperbarui harga produk, silahkan coba lagi");
+      throw new InternalServerError(
+        "Gagal memperbarui harga produk, silahkan coba lagi",
+      );
   },
 
   restock: async (id: number, dto: RestockProductDTO): Promise<void> => {
     if (dto.quantity <= 0)
-      throw new Error("Jumlah penambahan stok tidak valid");
+      throw new BadRequestError("Jumlah penambahan stok tidak valid");
 
     const product = await productRepository.findById(id);
-    if (!product) throw new Error("Produk tidak ditemukan");
+    if (!product) throw new NotFoundError("Produk tidak ditemukan");
 
     const result = await productRepository.incrementStock(id, dto);
     if (!result)
-      throw new Error("Gagal menambah stok produk, silahkan coba lagi");
+      throw new InternalServerError("Gagal menambah stok produk, silahkan coba lagi");
   },
 
   reduceStock: async (
@@ -132,19 +146,19 @@ export const productService = {
     dto: ReduceStockProductDTO,
   ): Promise<void> => {
     if (dto.quantity <= 0)
-      throw new Error("Jumlah pengurangan stok tidak valid");
+      throw new BadRequestError("Jumlah pengurangan stok tidak valid");
 
     const product = await productRepository.findById(id);
-    if (!product) throw new Error("Produk tidak ditemukan");
+    if (!product) throw new NotFoundError("Produk tidak ditemukan");
 
     if (product.stock < dto.quantity)
-      throw new Error(
+      throw new BadRequestError(
         `Stok tidak mencukupi, Sisa stok saat ini: ${product.stock}`,
       );
 
     const result = await productRepository.decrementStock(id, dto);
     if (!result)
-      throw new Error("Gagal mengurangi stok produk, silahkan coba lagi");
+      throw new InternalServerError("Gagal mengurangi stok produk, silahkan coba lagi");
   },
 
   bulkRestock: async (items: BulkRestockProductDTO): Promise<void> => {
@@ -159,7 +173,7 @@ export const productService = {
         });
 
         if (!isRestock)
-          throw new Error(`Produk dengan ID ${item.id} tidak ditemukan`);
+          throw new NotFoundError(`Produk dengan ID ${item.id} tidak ditemukan`);
       }
 
       await client.query("COMMIT");
@@ -174,19 +188,19 @@ export const productService = {
 
   deleteById: async (id: number): Promise<void> => {
     const product = await productRepository.findById(id);
-    if (!product) throw new Error("Product not found");
+    if (!product) throw new NotFoundError("Produk tidak tersedia");
 
     const result = await productRepository.deleteById(id);
-    if (!result) throw new Error("Gagal menghapus produk, silahkan coba lagi");
+    if (!result) throw new InternalServerError("Gagal menghapus produk, silahkan coba lagi");
   },
 
   bulkDelete: async (dto: BulkDeleteProductsDTO): Promise<number> => {
     if (!dto.ids || dto.ids.length === 0)
-      throw new Error("Daftar ID produk tidak boleh kosong");
+      throw new BadRequestError("Daftar ID produk tidak boleh kosong");
 
     const deleteCount = await productRepository.deleteManyByIds(dto.ids);
     if (deleteCount === 0)
-      throw new Error("Tidak ada produk yang berhasil dihapus");
+      throw new InternalServerError("Tidak ada produk yang berhasil dihapus");
 
     return deleteCount;
   },
