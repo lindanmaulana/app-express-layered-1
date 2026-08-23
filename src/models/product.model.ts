@@ -4,14 +4,14 @@ export type Product = {
   id: number;
   name: string;
   sku: string;
-  price: string;
+  price: number;
   stock: number;
   created_at: Date;
 };
 
 export type ProductResponse = Product;
 
-export type GetProductsQueryDTO = {
+export type GetProductsQueryData = {
   search?: string | undefined;
   minPrice?: number | undefined;
   maxPrice?: number | undefined;
@@ -21,7 +21,7 @@ export type GetProductsQueryDTO = {
 };
 
 export type ProductFilterParams = Pick<
-  GetProductsQueryDTO,
+  GetProductsQueryData,
   "search" | "minPrice" | "maxPrice" | "limit"
 > & { offset?: number };
 
@@ -30,29 +30,31 @@ export type PaginatedProductsResult = {
   meta: PaginationMeta;
 };
 
-export type CreateProductDTO = Omit<Product, "id" | "created_at"> & {
+export type CreateProductData = Omit<Product, "id" | "created_at"> & {
   stock?: number | undefined;
 };
 
-export type UpdateProductDTO = Partial<Omit<Product, "id" | "created_at">>;
+export type UpdateProductData = {
+  [K in keyof CreateProductData]?: Product[K] | undefined
+}
 
-export type RestockProductDTO = {
+export type RestockProductData = {
   quantity: number;
 };
 
-export type ReduceStockProductDTO = {
+export type ReduceStockProductData = {
   quantity: number;
 };
 
-export type BulkRestockProductDTO = {
+export type BulkRestockProductData = {
   id: number;
   quantity: number;
 }[];
 
-export type ChangePriceProductDTO = {
+export type ChangePriceProductData = {
   amount: number;
 };
 
-export type BulkDeleteProductsDTO = {
+export type BulkDeleteProductsData = {
   ids: number[];
 };

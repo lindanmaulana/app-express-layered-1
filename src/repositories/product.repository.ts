@@ -1,12 +1,12 @@
 import pool from "../config/db.js";
 import type {
-  ChangePriceProductDTO,
-  CreateProductDTO,
+  ChangePriceProductData,
+  CreateProductData,
   Product,
   ProductFilterParams,
-  ReduceStockProductDTO,
-  RestockProductDTO,
-  UpdateProductDTO,
+  ReduceStockProductData,
+  RestockProductData,
+  UpdateProductData
 } from "../models/product.model.js";
 
 export const productRepository = {
@@ -111,11 +111,9 @@ export const productRepository = {
     return (result.rowCount ?? 0) > 0;
   },
 
-  create: async (dto: CreateProductDTO): Promise<Product> => {
+  create: async (dto: CreateProductData): Promise<Product> => {
     const query =
       "INSERT INTO products (name, sku, price, stock) VALUES ($1, $2, $3, $4) RETURNING *";
-
-    console.log({ dto, query });
     
     const result = await pool.query<Product>(query, [
       dto.name,
@@ -130,7 +128,7 @@ export const productRepository = {
     return createdProduct;
   },
 
-  updateById: async (id: number, dto: UpdateProductDTO): Promise<boolean> => {
+  updateById: async (id: number, dto: UpdateProductData): Promise<boolean> => {
     const query =
       "UPDATE products SET name = COALESCE($1, name), sku = COALESCE($2, sku), price = COALESCE($3::numeric, price), stock = COALESCE($4::int, stock) WHERE id = $5";
     const result = await pool.query<Product>(query, [
@@ -146,7 +144,7 @@ export const productRepository = {
 
   updatePrice: async (
     id: number,
-    dto: ChangePriceProductDTO,
+    dto: ChangePriceProductData,
   ): Promise<boolean> => {
     const query = "UPDATE products SET price = $1 WHERE id = $2";
     const result = await pool.query<Product>(query, [dto.amount, id]);
@@ -156,7 +154,7 @@ export const productRepository = {
 
   incrementStock: async (
     id: number,
-    dto: RestockProductDTO,
+    dto: RestockProductData,
   ): Promise<boolean> => {
     const query = "UPDATE products SET stock = stock + $1 WHERE id = $2";
     const result = await pool.query<Product>(query, [dto.quantity, id]);
@@ -166,7 +164,7 @@ export const productRepository = {
 
   decrementStock: async (
     id: number,
-    dto: ReduceStockProductDTO,
+    dto: ReduceStockProductData,
   ): Promise<boolean> => {
     const query = "UPDATE products SET stock = stock - $1 WHERE id = $2";
     const result = await pool.query<Product>(query, [dto.quantity, id]);

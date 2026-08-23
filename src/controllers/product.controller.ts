@@ -1,29 +1,25 @@
 import type { NextFunction, Request, Response } from "express";
+import type { Product } from "../models/product.model.js";
+import { productService } from "../services/product.service.js";
+import { StatusCodes } from "http-status-codes";
+import { sendResponse } from "../utils/response.util.js";
 import type {
   BulkDeleteProductsDTO,
   BulkRestockProductDTO,
   ChangePriceProductDTO,
   CreateProductDTO,
-  Product,
+  GetProductsQueryDTO,
   ReduceStockProductDTO,
   RestockProductDTO,
   UpdateProductDTO,
-} from "../models/product.model.js";
-import { productService } from "../services/product.service.js";
-import { StatusCodes } from "http-status-codes";
-import { sendResponse } from "../utils/response.util.js";
+} from "../validations/product.validation.js";
 
 export const productController = {
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const minPrice = req.query.minPrice
-        ? Number(req.query.minPrice)
-        : undefined;
-      const maxPrice = req.query.maxPrice
-        ? Number(req.query.maxPrice)
-        : undefined;
+      const query = req.query as unknown as GetProductsQueryDTO
 
-      const result = await productService.getAll({ minPrice, maxPrice });
+      const result = await productService.getAll(query);
 
       res.status(StatusCodes.OK).json({
         success: true,
@@ -41,9 +37,14 @@ export const productController = {
       const id = Number(req.params.id);
       const result = await productService.getById(id);
 
-      sendResponse<Product>(res, StatusCodes.OK, "Berhasil memuat data produk", result)
+      sendResponse<Product>(
+        res,
+        StatusCodes.OK,
+        "Berhasil memuat data produk",
+        result,
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -54,10 +55,10 @@ export const productController = {
       res.status(StatusCodes.OK).json({
         success: true,
         message: "Berhasil memuat data produk dengan stok menipis",
-        data: result
-      })
+        data: result,
+      });
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -65,9 +66,14 @@ export const productController = {
     try {
       const result = await productService.getHighStock();
 
-      sendResponse<Product[]>(res, StatusCodes.OK, "Berhasil memuat data produk dengan stok banyak", result)
+      sendResponse<Product[]>(
+        res,
+        StatusCodes.OK,
+        "Berhasil memuat data produk dengan stok banyak",
+        result,
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -76,9 +82,14 @@ export const productController = {
       const payload: CreateProductDTO = req.body;
       const result = await productService.create(payload);
 
-      sendResponse<Product>(res, StatusCodes.CREATED, "Berhasil menambahkan produk baru", result)
+      sendResponse<Product>(
+        res,
+        StatusCodes.CREATED,
+        "Berhasil menambahkan produk baru",
+        result,
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -89,9 +100,9 @@ export const productController = {
 
       await productService.updateById(id, payload);
 
-      sendResponse<void>(res, StatusCodes.OK, "Berhasil memperbarui produk")
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil memperbarui produk");
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -102,9 +113,13 @@ export const productController = {
 
       await productService.changePrice(id, payload);
 
-      sendResponse<void>(res, StatusCodes.OK, "Berhasil memperbarui harga produk")
+      sendResponse<void>(
+        res,
+        StatusCodes.OK,
+        "Berhasil memperbarui harga produk",
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -115,9 +130,9 @@ export const productController = {
 
       await productService.restock(id, payload);
 
-      sendResponse<void>(res, StatusCodes.OK, "Berhasil menambah stok produk")
+      sendResponse<void>(res, StatusCodes.OK, "Berhasil menambah stok produk");
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -128,9 +143,13 @@ export const productController = {
 
       await productService.reduceStock(id, payload);
 
-      sendResponse<void>(res, StatusCodes.OK, "Berhasil mengurangi stok produk")
+      sendResponse<void>(
+        res,
+        StatusCodes.OK,
+        "Berhasil mengurangi stok produk",
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -140,9 +159,13 @@ export const productController = {
 
       await productService.bulkRestock(payload);
 
-      sendResponse<void>(res, StatusCodes.OK, "Berhasil menambah stok beberapa produk")
+      sendResponse<void>(
+        res,
+        StatusCodes.OK,
+        "Berhasil menambah stok beberapa produk",
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -151,9 +174,13 @@ export const productController = {
       const id = Number(req.params.id);
       await productService.deleteById(id);
 
-      sendResponse<void>(res, StatusCodes.OK, "Berhasil menghapus produk dari sistem")
+      sendResponse<void>(
+        res,
+        StatusCodes.OK,
+        "Berhasil menghapus produk dari sistem",
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 
@@ -163,9 +190,13 @@ export const productController = {
 
       const result = await productService.bulkDelete(ids);
 
-      sendResponse<void>(res, StatusCodes.OK, `Berhasil menghapus sebanyak ${result} produk dari sistem`)
+      sendResponse<void>(
+        res,
+        StatusCodes.OK,
+        `Berhasil menghapus sebanyak ${result} produk dari sistem`,
+      );
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
 };

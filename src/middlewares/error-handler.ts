@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { CustomAPIError } from "../errors/index.js";
 import { StatusCodes } from "http-status-codes";
 import type { DatabaseError } from "../types/index.js";
+import { ZodError } from "zod";
 
 export const errorHandler = (
   err: Error | DatabaseError,
@@ -9,6 +10,19 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
+  if (err instanceof ZodError) {
+    const formattedErrors = err.issues.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+    }));
+
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: "Validasi data gagal",
+      errors: formattedErrors,
+    });
+  }
+
   if (err instanceof CustomAPIError) {
     return res.status(err.statusCode).json({
       success: false,

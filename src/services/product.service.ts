@@ -2,18 +2,11 @@ import pool from "../config/db.js";
 import { BadRequestError, ConflictError, InternalServerError, NotFoundError } from "../errors/index.js";
 
 import type {
-  BulkDeleteProductsDTO,
-  BulkRestockProductDTO,
-  ChangePriceProductDTO,
-  CreateProductDTO,
-  GetProductsQueryDTO,
   PaginatedProductsResult,
   Product,
-  ReduceStockProductDTO,
-  RestockProductDTO,
-  UpdateProductDTO,
 } from "../models/product.model.js";
 import { productRepository } from "../repositories/product.repository.js";
+import type { BulkDeleteProductsDTO, BulkRestockProductDTO, ChangePriceProductDTO, CreateProductDTO, GetProductsQueryDTO, ReduceStockProductDTO, RestockProductDTO, UpdateProductDTO } from "../validations/product.validation.js";
 
 export const productService = {
   getAll: async (
