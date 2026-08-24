@@ -1,15 +1,34 @@
 import type { NextFunction, Request, Response } from "express";
-import { CustomAPIError } from "../errors/index.js";
 import { StatusCodes } from "http-status-codes";
-import type { DatabaseError } from "../types/index.js";
 import { ZodError } from "zod";
+import { CustomAPIError } from "../errors/index.js";
 
 export const errorHandler = (
-  err: Error | DatabaseError,
+  err: unknown,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+
+  const isOperationalError = err instanceof CustomAPIError || Boolean((err as any)?.isOperational)
+
+  if (!isOperationalError) {
+    console.error("💥 Unhandle Programmer Error / System Crash")
+  } else {
+    console.error("💥 Expected Bussiness Error")
+  }
+
+  if (isOperationalError) {
+    const operationalErr = err as CustomAPIError
+    const statusCode = typeof operationalErr.statusCode === "number" && operationalErr.statusCode >= 400 ? operationalErr.statusCode : StatusCodes.BAD_REQUEST
+
+    return res.status(statusCode).json({
+      success: false,
+      message: operationalErr.message,
+    });
+  }
+
+
   if (err instanceof ZodError) {
     const formattedErrors = err.issues.map((e) => ({
       field: e.path.join("."),
@@ -23,14 +42,15 @@ export const errorHandler = (
     });
   }
 
-  if (err instanceof CustomAPIError) {
-    return res.status(err.statusCode).json({
+  if (typeof err === "object" && err !== null && "type" in err && err.type === "entity.parse.failed") {
+    console.log({err})
+    return res.status(400).json({
       success: false,
-      message: err.message,
+      message: "Format JSON pada request body tidak valid",
     });
   }
 
-  if ("code" in err && err.code) {
+  if (typeof err === "object" && err !== null && "code" in err) {
     switch (err.code) {
       case "23505":
         return res.status(StatusCodes.CONFLICT).json({
@@ -49,20 +69,21 @@ export const errorHandler = (
           success: false,
           message: "Format tipe data input tidak valid",
         });
+
+      case "23502": 
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "Kolom wajib pada database tidak boleh bernilai null",
+        });
     }
   }
 
-  if ("type" in err && err.type === "entity.parse.failed") {
-    return res.status(400).json({
-      success: false,
-      message: "Format JSON pada request body tidak valid",
-    });
-  }
+
 
   console.error("💥 UNEXPECTED SERVER ERROR:", err);
 
-  return res.status(500).json({
+  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message: "Terjadi kesalahan tidak terduga, coba lagi nanti",
+    message: "Terjadi kesalahan tidak terduga pada server, coba lagi nanti",
   });
 };

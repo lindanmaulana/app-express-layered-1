@@ -1,6 +1,6 @@
 import pool from "../config/db.js";
 import type {
-  CreateUserDTO,
+  CreateUserData,
   UpdateUserDTO,
   User,
 } from "../models/user.model.js";
@@ -26,9 +26,11 @@ export const userRepository = {
     return (result.rowCount ?? 0) > 0;
   },
 
-  create: async (dto: CreateUserDTO): Promise<User> => {
-    const query = "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *";
-    const result = await pool.query<User>(query, [dto.name, dto.email]);
+  create: async (dto: CreateUserData): Promise<User> => {
+    const query = "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at, updated_at";
+    const values = [dto.name, dto.email, dto.password, dto.role]
+
+    const result = await pool.query<User>(query, values);
 
     const createdUser = result.rows[0];
 

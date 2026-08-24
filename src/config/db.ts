@@ -1,12 +1,12 @@
 import { Pool } from "pg";
-import env from "./env.js";
+import { env } from "./env.js";
 
 const pool = new Pool({
-  user: env.db.user,
-  host: env.db.host,
-  database: env.db.name,
-  password: env.db.password,
-  port: Number(env.db.port),
+  user: env.DB_USER,
+  host: env.DB_HOST,
+  database: env.DB_NAME,
+  password: env.DB_PASSWORD,
+  port: Number(env.DB_PORT),
 });
 
 export default pool;

@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import type {
-  CreateUserDTO,
   GetByIdUserDTO,
   UpdateUserDTO,
 } from "../models/user.model.js";
@@ -19,14 +18,6 @@ export const userController = {
     const user = await userService.getById(Number(id));
 
     res.json(user);
-  },
-
-  create: async (req: Request, res: Response) => {
-    const payload: CreateUserDTO = req.body;
-
-    const newUser = await userService.create(payload);
-
-    res.json(newUser);
   },
 
   update: async (req: Request, res: Response) => {
