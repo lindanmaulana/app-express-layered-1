@@ -1,9 +1,10 @@
+import { BadRequestError } from "../errors/bad-request.js";
 import { ConflictError } from "../errors/conflict.js";
 import { userRepository } from "../repositories/user.repository.js";
 import type { AuthResponse } from "../types/auth.type.js";
-import { generatedAccessToken, generateRefreshToken } from "../utils/jwt.util.js";
-import { hashPassword } from "../utils/password.util.js";
-import type { RegisterDTO } from "../validations/auth.validation.js";
+import { generatedAccessToken, generatedTokens, generateRefreshToken } from "../utils/jwt.util.js";
+import { comparePassword, hashPassword } from "../utils/password.util.js";
+import type { LoginDTO, RegisterDTO } from "../validations/auth.validation.js";
 
 export const authService = {
     register: async (dto: RegisterDTO): Promise<AuthResponse> => {
@@ -16,8 +17,6 @@ export const authService = {
         const accessToken = generatedAccessToken({userId: result.id, email: result.email, role: result.role})
         const refreshToken = generateRefreshToken({userId: result.id, email: result.email, role: result.role})
 
-        console.log({accessToken, refreshToken})
-
         return {
             user: result,
             tokens: {
@@ -27,5 +26,22 @@ export const authService = {
         }
     },
 
-    login: async () => {}
+    login: async (dto: LoginDTO): Promise<AuthResponse> => {
+        const user = await userRepository.findByEmail(dto.email)
+        if (!user) throw new BadRequestError("Email atau password salah.")
+
+        const isComparePassword = await comparePassword(dto.password, user.password)
+        if (!isComparePassword) throw new BadRequestError("Email atau password salah")
+
+        const {accessToken, refreshToken} = generatedTokens({userId: user.id, email: user.email, role: user.role})
+        const { password, ...safeUser } = user
+        
+        return {
+            user: safeUser,
+            tokens: {
+                accessToken,
+                refreshToken
+            }
+        }
+    }
 }

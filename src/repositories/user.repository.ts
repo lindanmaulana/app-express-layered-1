@@ -19,6 +19,13 @@ export const userRepository = {
     return result.rows[0] ?? null;
   },
 
+  findByEmail: async (email: string): Promise<User | null> => {
+    const query = "SELECT id, name, email, password, role, created_at, updated_at FROM users WHERE email = $1";
+    const result = await pool.query<User>(query, [email])
+
+    return result.rows[0] ?? null
+  },
+
   existsByEmail: async (email: string): Promise<boolean> => {
     const query = "SELECT 1 FROM users WHERE email = $1";
     const result = await pool.query<User>(query, [email]);

@@ -3,12 +3,13 @@ import { productController } from "../controllers/product.controller.js";
 import { validate } from "../middlewares/validate.js";
 import { idParamSchema } from "../validations/param.validation.js";
 import { createProductSchema, getProductsQuerySchema, reduceStockProductSchema, restockProductSchema } from "../validations/product.validation.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 // router.param("id", validateIdParam)
 
-router.get("/",  validate({ query: getProductsQuerySchema }), productController.getAll);
+router.get("/", authenticate,  validate({ query: getProductsQuerySchema }), productController.getAll);
 router.post("/", validate({ body: createProductSchema }), productController.create);
 router.get("/low-stock", productController.getLowStock);
 router.get("/high-stock", productController.getHighStock);

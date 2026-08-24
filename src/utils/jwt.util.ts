@@ -6,7 +6,7 @@ import type { JwtPayload } from "../types/jwt.type.js";
 import { UnauthorizedError } from "../errors/unauthorized.js";
 
 export const generatedAccessToken = (payload: JwtPayload): string => {
-    if (!env.JWT_ACCESS_TOKEN) throw new NotFoundError("Data token akses tidak ditemukan")
+    if (!env.JWT_ACCESS_TOKEN) throw new NotFoundError("Konfigurasi JWT Access Token tidak ditemukan")
 
     const expiresIn = (env.JWT_ACCESS_EXPIRES_IN ?? "15m") as StringValue
 
@@ -16,13 +16,20 @@ export const generatedAccessToken = (payload: JwtPayload): string => {
 }
 
 export const generateRefreshToken = (payload: JwtPayload): string => {
-    if (!env.JWT_REFRESH_TOKEN) throw new NotFoundError("Data refresh token tidak ditemukan")
+    if (!env.JWT_REFRESH_TOKEN) throw new NotFoundError("Konfigurasi JWT Refresh Token tidak ditemukan")
 
     const expiresIn =(env.JWT_REFRESH_EXPIRES_IN ?? "7d") as StringValue
 
     return jwt.sign(payload, env.JWT_REFRESH_TOKEN, {
         expiresIn: expiresIn
     })
+}
+
+export const generatedTokens = (payload: JwtPayload): {accessToken: string, refreshToken: string} => {
+    return {
+        accessToken: generatedAccessToken(payload),
+        refreshToken: generateRefreshToken(payload)
+    }
 }
 
 export const verifyAccessToken = (token: string): JwtPayload => {

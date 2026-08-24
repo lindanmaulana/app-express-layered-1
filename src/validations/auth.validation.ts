@@ -8,4 +8,10 @@ export const registerSchema = userSchema.pick({
     role: true
 })
 
+export const loginSchema = userSchema.pick({
+    email: true,
+    password: true
+})
+
 export type RegisterDTO = z.infer<typeof registerSchema>
+export type LoginDTO = z.infer<typeof loginSchema>
