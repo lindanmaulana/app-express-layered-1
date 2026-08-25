@@ -1,17 +1,15 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 import type {
   GetByIdUserDTO,
-  UpdateUserDTO,
 } from "../models/user.model.js";
 import { userService } from "../services/user.service.js";
+import type { JwtPayload } from "../types/jwt.type.js";
+import { getAuthUser } from "../utils/auth-user.util.js";
+import { sendResponse } from "../utils/response.util.js";
+import type { UpdateProfileUserDTO } from "../validations/user.validation.js";
 
 export const userController = {
-  getAll: async (req: Request, res: Response) => {
-    const users = await userService.getAll();
-
-    res.json(users);
-  },
-
   getById: async (req: Request, res: Response) => {
     const { id }: GetByIdUserDTO = { id: req.params.id as string };
 
@@ -20,20 +18,28 @@ export const userController = {
     res.json(user);
   },
 
-  update: async (req: Request, res: Response) => {
-    const { id } = { id: req.params.id as string };
-    const payload: UpdateUserDTO = req.body;
+  getProfile: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = getAuthUser(req) as JwtPayload
 
-    const user = await userService.update(Number(id), payload);
+      const result = await userService.getProfile(user.userId)
 
-    res.json(user);
+      sendResponse(res, StatusCodes.OK, "Profil pengguna berhasil dimuat", result)
+    } catch (err) {
+      next(err)
+    }
   },
 
-  delete: async (req: Request, res: Response) => {
-    const { id } = { id: req.params.id as string };
+  updateProfile: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = getAuthUser(req) as JwtPayload
+      const payload: UpdateProfileUserDTO = req.body;
 
-    const user = await userService.delete(Number(id));
+      const result = await userService.updateProfile(user.userId, payload);
 
-    res.json(user);
-  },
+      sendResponse(res, StatusCodes.OK, "Profile berhasil diperbarui", result)
+    } catch (err) {
+      next(err)
+    }
+  }
 };

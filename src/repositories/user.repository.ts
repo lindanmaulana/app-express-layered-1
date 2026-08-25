@@ -1,13 +1,49 @@
 import pool from "../config/db.js";
 import type {
   CreateUserData,
-  UpdateUserDTO,
+  GetUsersQueryData,
+  UpdateUserData,
   User,
+  UserFilterParams,
 } from "../models/user.model.js";
 
 export const userRepository = {
-  findAll: async (): Promise<User[]> => {
-    const result = await pool.query<User>("SELECT * FROM users");
+  buildWhereClause: (filter: UserFilterParams) => {
+    const condition: string[] = []
+    const values: (string | number | boolean)[] = []
+
+    if (filter.search) {
+      values.push(`%${filter.search}%`)
+      condition.push(`name ILIKE $${values.length}`)
+    }
+
+    if (filter.role) {
+      values.push(filter.role)
+      condition.push(`role = $${values.length}`)
+    }
+
+    const whereSQL = condition.length > 0 ? `WHERE ${condition.join(" AND ")}` : ""
+
+    return {whereSQL, values}
+  },
+
+  findAll: async (filter: UserFilterParams): Promise<User[]> => {
+    const {whereSQL, values} = userRepository.buildWhereClause(filter)
+    const queryValues = [...values]
+
+    let paginationClause = ""
+    if (filter.limit) {
+      queryValues.push(filter.limit)
+      paginationClause = ` LIMIT $${queryValues.length}`
+    }
+
+    if (filter.offset) {
+      queryValues.push(filter.offset)
+      paginationClause = ` OFFSET $${queryValues.length}`
+    }
+
+    const query = `SELECT id, name, email, role, created_at, updated_at FROM users ${whereSQL} ORDER BY id DESC ${paginationClause}`
+    const result = await pool.query<User>(query, queryValues);
 
     return result.rows;
   },
@@ -26,6 +62,15 @@ export const userRepository = {
     const result = await pool.query<User>(query, [email])
 
     return result.rows[0] ?? null
+  },
+
+  countAll: async (filter: UserFilterParams): Promise<number> => {
+    const {whereSQL, values} = userRepository.buildWhereClause(filter)
+
+    const query = `SELECT COUNT(id) AS total FROM users ${whereSQL}`
+    const result = await pool.query(query, values)
+
+    return parseInt(result.rows[0].total ?? 10)
   },
 
   existsByEmail: async (email: string): Promise<boolean> => {
@@ -48,10 +93,10 @@ export const userRepository = {
     return createdUser;
   },
 
-  updateById: async (id: number, dto: UpdateUserDTO): Promise<User | null> => {
-    const query =
-      "UPDATE users SET name = COALESCE($1, name) WHERE id = $2 RETURNING *";
-    const result = await pool.query<User>(query, [dto.name ?? null, id]);
+  updateById: async (id: number, dto: UpdateUserData): Promise<User | null> => {
+    const query: string = "UPDATE users SET name = COALESCE($1, name), email = COALESCE($2, email), password = COALESCE($3, password), role = COALESCE($4, role) WHERE id = $5 RETURNING id, name, email, role, created_at, updated_at";
+    const values: (string | number | null)[] = [dto.name ?? null, dto.email ?? null, dto.password ?? null, dto.role ?? null, id]
+    const result = await pool.query<User>(query, values);
 
     return result.rows[0] ?? null;
   },

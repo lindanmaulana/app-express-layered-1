@@ -48,7 +48,7 @@ export const authController = {
                 maxAge: 7 * MS.DAY
             })
 
-            sendResponse(res, StatusCodes.CREATED, "Login akun berhasil", result.user)
+            sendResponse(res, StatusCodes.CREATED, "Login akun berhasil")
         } catch (err) {
             next(err)
         }

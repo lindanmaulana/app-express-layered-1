@@ -1,5 +1,5 @@
 import z from "zod";
-import { idSchema } from "./base.validation.js";
+import { idSchema, paginationQuerySchema } from "./base.validation.js";
 import { USER_ROLE, USER_ROLES } from "../constants/user-role.constant.js";
 
 export const userSchema = z.object({
@@ -12,4 +12,18 @@ export const userSchema = z.object({
     updated_at: z.date().optional()
 })
 
+export const getUsersQuerySchema = paginationQuerySchema.extend({
+    search: z.string().trim().optional(),
+    role: z.enum(USER_ROLES, "Role User tidak valid").optional()
+})
+
+export const updateProfileUserSchema = userSchema.pick({
+    name: true,
+    email: true
+}).partial()
+
 export type UserDTO = z.infer<typeof userSchema>
+
+export type GetUsersQueryDTO = z.infer<typeof getUsersQuerySchema>
+
+export type UpdateProfileUserDTO = z.infer<typeof updateProfileUserSchema>
