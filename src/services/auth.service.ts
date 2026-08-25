@@ -1,5 +1,6 @@
 import { BadRequestError } from "../errors/bad-request.js";
 import { ConflictError } from "../errors/conflict.js";
+import { UnauthorizedError } from "../errors/unauthorized.js";
 import { userRepository } from "../repositories/user.repository.js";
 import type { AuthResponse } from "../types/auth.type.js";
 import { generatedAccessToken, generatedTokens, generateRefreshToken } from "../utils/jwt.util.js";
@@ -43,5 +44,15 @@ export const authService = {
                 refreshToken
             }
         }
+    },
+
+
+    refreshAccessToken: async (id: number): Promise<string> => {
+        const user = await userRepository.findById(id)
+        if (!user) throw new UnauthorizedError("Pengguna tidak ditemukan atau akun telah di nonaktifkan.")
+
+        const newAccessToken = generatedAccessToken({userId: user.id, email: user.email, role: user.role})
+
+        return newAccessToken
     }
 }

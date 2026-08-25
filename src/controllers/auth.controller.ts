@@ -5,6 +5,9 @@ import { StatusCodes } from "http-status-codes"
 import { sendResponse } from "../utils/response.util.js"
 import { MS } from "../constants/time.const.js"
 import { JWT_DEFAULT } from "../constants/jwt.constant.js"
+import type { AuthenticatedRequest } from "../types/express.type.js"
+import { getAuthUser } from "../utils/auth-user.util.js"
+import type { JwtPayload } from "../types/jwt.type.js"
 
 
 export const authController = {
@@ -49,5 +52,32 @@ export const authController = {
         } catch (err) {
             next(err)
         }
-    }
+    },
+
+    logout: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            res.clearCookie(JWT_DEFAULT.ACCESS_TOKEN)
+            res.clearCookie(JWT_DEFAULT.REFRESH_TOKEN)
+
+            sendResponse(res, StatusCodes.OK, "Logout berhasil. Anda telah keluar dari sesi")
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    refreshAccessToken: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = getAuthUser(req) as JwtPayload
+            const newAccessToken = await authService.refreshAccessToken(user.userId)
+
+            res.cookie(JWT_DEFAULT.ACCESS_TOKEN, newAccessToken, {
+                httpOnly: true,
+                maxAge: 1 * MS.HOUR
+            })
+
+            sendResponse(res, StatusCodes.OK, "Sesi berhasil diperbarui")
+        } catch (err) {
+            next(err)
+        }
+    },
 }

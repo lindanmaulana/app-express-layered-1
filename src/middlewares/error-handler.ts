@@ -78,8 +78,6 @@ export const errorHandler = (
     }
   }
 
-
-
   console.error("💥 UNEXPECTED SERVER ERROR:", err);
 
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

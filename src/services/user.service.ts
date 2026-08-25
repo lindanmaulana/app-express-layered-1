@@ -1,5 +1,4 @@
 import type {
-  CreateUserDTO,
   UpdateUserDTO,
   User,
 } from "../models/user.model.js";
@@ -16,15 +15,6 @@ export const userService = {
     const result = await userRepository.findById(id);
 
     if (!result) throw new Error("User not found");
-
-    return result;
-  },
-
-  create: async (dto: CreateUserDTO): Promise<User> => {
-    const isEmailExists = await userRepository.existsByEmail(dto.email);
-    if (isEmailExists) throw new Error("Email is taken.");
-
-    const result = await userRepository.create(dto);
 
     return result;
   },

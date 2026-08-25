@@ -33,10 +33,21 @@ export const generatedTokens = (payload: JwtPayload): {accessToken: string, refr
 }
 
 export const verifyAccessToken = (token: string): JwtPayload => {
-    if (!env.JWT_ACCESS_TOKEN) throw new NotFoundError("Data token akses tidak ditemukan")
-
+    if (!env.JWT_ACCESS_TOKEN) throw new NotFoundError("Konfigurasi JWT Access Token tidak ditemukan")
+        
     try {
         return jwt.verify(token, env.JWT_ACCESS_TOKEN) as JwtPayload
+    } catch (err) {
+        throw new UnauthorizedError("Sesi akses tidak valid atau sudah kedaluarsa")
+    }
+}
+
+
+export const verifyRefreshToken = (refreshToken: string): JwtPayload => {
+    if(!env.JWT_REFRESH_TOKEN) throw new NotFoundError("Konfigurasi JWT Refresh Token tidak ditemukan")
+
+    try {
+        return jwt.verify(refreshToken, env.JWT_REFRESH_TOKEN) as JwtPayload
     } catch (err) {
         throw new UnauthorizedError("Sesi akses tidak valid atau sudah kedaluarsa")
     }

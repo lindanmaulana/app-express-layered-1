@@ -13,8 +13,10 @@ export const userRepository = {
   },
 
   findById: async (id: number): Promise<User | null> => {
-    const query = "SELECT * FROM users WHERE id = $1";
+    const query = "SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = $1";
     const result = await pool.query<User>(query, [id]);
+
+    console.log({result: result.rows[0]})
 
     return result.rows[0] ?? null;
   },
