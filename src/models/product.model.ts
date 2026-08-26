@@ -13,17 +13,17 @@ export type ProductResponse = Product;
 
 export type GetProductsQueryData = {
   search?: string | undefined;
-  minPrice?: number | undefined;
-  maxPrice?: number | undefined;
+  min_price?: number | undefined;
+  max_price?: number | undefined;
+
+  category_id?: number | undefined;
+  category_slug?: string | undefined
 
   page?: number | undefined;
   limit?: number | undefined;
 };
 
-export type ProductFilterParams = Pick<
-  GetProductsQueryData,
-  "search" | "minPrice" | "maxPrice" | "limit"
-> & { offset?: number };
+export type ProductFilterParams = Omit<GetProductsQueryData, "page"> & { offset?: number }
 
 export type PaginatedProductsResult = {
   data: Product[];

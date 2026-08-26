@@ -19,14 +19,19 @@ export const productRepository = {
       conditions.push(`name ILIKE $${params.length}`);
     }
 
-    if (filters.minPrice) {
-      params.push(filters.minPrice);
+    if (filters.min_price) {
+      params.push(filters.min_price);
       conditions.push(`price >= $${params.length}`);
     }
 
-    if (filters.maxPrice) {
-      params.push(filters.maxPrice);
+    if (filters.max_price) {
+      params.push(filters.max_price);
       conditions.push(`price <= $${params.length}`);
+    }
+
+    if (filters.category_id) {
+      params.push(filters.category_id)
+      conditions.push(` category_id = $${params.length}`)
     }
 
     const whereSQL =

@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { categoryService } from "../services/category.service.js";
 import { sendPaginationResponse, sendResponse } from "../utils/response.util.js";
 import type { GetCategoriesQueryDTO } from "../validations/category.validation.js";
+import type { GetProductsQueryDTO } from "../validations/product.validation.js";
 
 export const categoryController = {
     getAll: async (req: Request, res: Response, next: NextFunction) => {
@@ -23,6 +24,19 @@ export const categoryController = {
             const result = await categoryService.getBySlug(slug)
 
             sendResponse(res, StatusCodes.OK, "Berhasil memuat detail kategori", result)
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    getByIdWithProducts: async ( req: Request, res: Response, next: NextFunction ) => {
+        try {
+            const id = Number(req.params.id)
+            const query = req.query as unknown as GetProductsQueryDTO
+
+            const result = await categoryService.getByIdWithProducts(id, query)
+
+            sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat detail kategori beserta produk", result.data, result.meta)
         } catch (err) {
             next(err)
         }

@@ -10,7 +10,7 @@ export const sendResponse = <T>(res: Response, statusCode: number, message: stri
 }
 
 
-export const sendPaginationResponse = <T>(res: Response, statusCode: number, message: string, data: T[], meta: PaginationMeta): Response<ApiPaginationResponse<T>> => {
+export const sendPaginationResponse = <T>(res: Response, statusCode: number, message: string, data: T | T[], meta: PaginationMeta): Response<ApiPaginationResponse<T>> => {
     return res.status(statusCode).json({
         success: true,
         message: message,
@@ -18,3 +18,4 @@ export const sendPaginationResponse = <T>(res: Response, statusCode: number, mes
         meta: meta
     })
 }
+

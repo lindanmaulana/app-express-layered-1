@@ -8,8 +8,6 @@ import { createProductSchema, getProductsQuerySchema, reduceStockProductSchema, 
 
 const router = Router();
 
-// router.param("id", validateIdParam)
-
 router.get("/", authenticate,  validate({ query: getProductsQuerySchema }), productController.getAll);
 router.post("/", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({ body: createProductSchema }), productController.create);
 router.get("/low-stock", productController.getLowStock);

@@ -15,8 +15,10 @@ export const productSchema = z.object({
 
 export const getProductsQuerySchema = paginationQuerySchema.extend({
     search: z.string().trim().optional(),
-    minPrice: z.coerce.number().positive("Harga minimal harus lebih dari 0").optional(),
-    maxPrice: z.coerce.number().positive("Harga maksimal harus lebih dari 0").optional(),
+    min_price: z.coerce.number().positive("Harga minimal harus lebih dari 0").optional(),
+    max_price: z.coerce.number().positive("Harga maksimal harus lebih dari 0").optional(),
+}).extend({
+    category_id: idSchema.optional()
 })
 
 

@@ -11,5 +11,6 @@ const router = Router()
 
     router.post("/", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({body: createCategorySchema}), adminCategoryController.create)
     router.patch("/:id", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({ params: idParamSchema, body: updateCategorySchema }), adminCategoryController.updateById)
+    router.delete("/:id", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({ params: idParamSchema }), adminCategoryController.deleteById)
 
 export default router 

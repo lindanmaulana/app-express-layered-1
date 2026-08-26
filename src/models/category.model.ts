@@ -1,4 +1,5 @@
 import type { PaginationMeta, PaginationQuery } from "../types/api.type.js"
+import type { ProductResponse } from "./product.model.js"
 
 export type Category = {
     id: number
@@ -8,9 +9,7 @@ export type Category = {
     updated_at: Date
 }
 
-
 export type CategoryResponse = Category
-
 
 export type GetCategoriesQueryData = PaginationQuery & {
     search?: string | undefined
@@ -19,6 +18,15 @@ export type GetCategoriesQueryData = PaginationQuery & {
 export type CategoryFilterParams = Omit<GetCategoriesQueryData, "page"> & { offset?: number }
 export type paginatedCategoriesResult = {
     data: Category[],
+    meta: PaginationMeta
+}
+
+export type GetCategoryByIdWithProductsResponse = {
+    data: {
+        category: Category,
+        products: ProductResponse[]
+    },
+
     meta: PaginationMeta
 }
 

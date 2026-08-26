@@ -1,11 +1,10 @@
-import pool from "../config/db.js";
-import { ConflictError } from "../errors/conflict.js";
-import { InternalServerError } from "../errors/internal-server.js";
 import { NotFoundError } from "../errors/not-found.js";
-import type { CategoryResponse, paginatedCategoriesResult } from "../models/category.model.js";
+import type { CategoryResponse, GetCategoryByIdWithProductsResponse, paginatedCategoriesResult } from "../models/category.model.js";
 import { categoryRepository } from "../repositories/category.repository.js";
+import { productRepository } from "../repositories/product.repository.js";
 import { parsePagination } from "../utils/pagination.util.js";
-import type { CreateCategoryDTO, GetCategoriesQueryDTO, UpdateCategoryDTO } from "../validations/category.validation.js";
+import type { GetCategoriesQueryDTO } from "../validations/category.validation.js";
+import type { GetProductsQueryDTO } from "../validations/product.validation.js";
 
 export const categoryService = {
     getAll: async (query: GetCategoriesQueryDTO): Promise<paginatedCategoriesResult> => {
@@ -27,11 +26,30 @@ export const categoryService = {
         }
     },
 
-    getById: async (id: number): Promise<CategoryResponse> => {
-        const result = await categoryRepository.findById(id)
-        if (!result) throw new NotFoundError("Kategori tidak ditemukan")
+    getByIdWithProducts: async (id: number, query: GetProductsQueryDTO): Promise<GetCategoryByIdWithProductsResponse> => {
+        const category = await categoryRepository.findById(id)
+        if (!category) throw new NotFoundError("Kategori tidak ditemukan")
 
-        return result
+        const {page, limit, skip} = parsePagination(query)
+
+        const [products, totalData] = await Promise.all([ productRepository.findAll({...query, limit, offset: skip, category_id: category.id}), productRepository.countAll({...query, limit, offset: skip, category_id: category.id}) ])
+        const totalPages = Math.ceil(totalData / limit)
+
+        return {
+            data: {
+                category: category,
+                products: products
+            },
+
+            meta: {
+                page: page,
+                limit: limit,
+                totalData: totalData,
+                totalPages: totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            }
+        }
     },
 
     getBySlug: async (slug: string): Promise<CategoryResponse> => {
@@ -40,26 +58,4 @@ export const categoryService = {
 
         return result
     },
-
-    create: async (dto: CreateCategoryDTO): Promise<CategoryResponse> => {
-        const slugExists = await categoryRepository.existsBySlug(dto.slug)
-        if (slugExists) throw new ConflictError(`Kategori dengan Slug ${dto.slug} sudah terdaftar`)
-
-        const result = await categoryRepository.create(dto)
-
-        return result
-    },
-
-    updateById: async (id: number, dto: UpdateCategoryDTO): Promise<void> => {
-        const category = await categoryRepository.findById(id)
-        if (!category) throw new NotFoundError("Kategori tidak ditemukan")
-
-        if (dto.slug) {
-            const isSlugExists = await categoryRepository.existsBySlugExludeId(category.id, dto.slug)
-            if (isSlugExists) throw new ConflictError(`Kategori dengan slug ${dto.slug} sudah terdaftar`)
-        }
-
-        const result = await categoryRepository.update(category.id, dto)
-        if (!result) throw new InternalServerError("Gagal memperbarui kategori, silahkan coba lagi")
-    }
 }

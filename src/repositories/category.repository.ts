@@ -89,5 +89,12 @@ export const categoryRepository = {
         const result = await pool.query<Category>(query, [data.name ?? null, data.slug ?? null, id])
 
         return (result.rowCount ?? 0) > 0
+    },
+
+    deleteById: async (id: number): Promise<boolean> => {
+        const query = "DELETE FROM categories WHERE id = $1"
+        const result = await pool.query(query, [id])
+
+        return (result.rowCount ?? 0) > 0
     }
 }
