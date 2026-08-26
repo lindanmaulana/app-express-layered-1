@@ -116,15 +116,16 @@ export const productRepository = {
     return (result.rowCount ?? 0) > 0;
   },
 
-  create: async (dto: CreateProductData): Promise<Product> => {
+  create: async (data: CreateProductData): Promise<Product> => {
     const query =
-      "INSERT INTO products (name, sku, price, stock) VALUES ($1, $2, $3, $4) RETURNING *";
+      "INSERT INTO products (category_id, name, sku, price, stock) VALUES ($1, $2, $3, $4, $5) RETURNING *";
     
     const result = await pool.query<Product>(query, [
-      dto.name,
-      dto.sku,
-      dto.price,
-      dto.stock,
+      data.category_id,
+      data.name,
+      data.sku,
+      data.price,
+      data.stock,
     ]);
 
     const createdProduct = result.rows[0];

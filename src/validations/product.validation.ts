@@ -4,6 +4,7 @@ import { idSchema, paginationQuerySchema, positiveIntSchema, positivePriceSchema
 
 export const productSchema = z.object({
     id: idSchema,
+    category_id: z.coerce.number().int("ID Kategori harus bilangan bulat").positive("ID Kategori harus berupa angka positif"),
     name: z.string().trim().min(3, "Nama produk minimal 3 karakter"),
     sku: z.string().trim().min(3, "SKU produk minimal 3 karakter").toUpperCase(),
     price: z.number().positive("Harga produk harus lebih dari 0"),
@@ -23,6 +24,7 @@ export const getProductsQuerySchema = paginationQuerySchema.extend({
 
 
 export const createProductSchema = productSchema.pick({
+    category_id: true,
     name: true,
     sku: true,
     price: true,

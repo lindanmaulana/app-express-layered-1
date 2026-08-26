@@ -75,6 +75,7 @@ export const errorHandler = (
         });
 
       case "23502": 
+      console.log({err})
         return res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
           message: "Kolom wajib pada database tidak boleh bernilai null",

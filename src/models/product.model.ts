@@ -2,6 +2,7 @@ import type { PaginationMeta } from "../types/api.type.js";
 
 export type Product = {
   id: number;
+  category_id: number;
   name: string;
   sku: string;
   price: number;
