@@ -1,0 +1,30 @@
+import type { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import { categoryService } from "../services/category.service.js";
+import { sendPaginationResponse, sendResponse } from "../utils/response.util.js";
+import type { GetCategoriesQueryDTO } from "../validations/category.validation.js";
+
+export const categoryController = {
+    getAll: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const payloadQuery = req.query as unknown as GetCategoriesQueryDTO
+            const result = await categoryService.getAll(payloadQuery)
+
+            sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat data kategori", result.data, result.meta)
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    getBySlug: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const slug = req.params.slug as string
+
+            const result = await categoryService.getBySlug(slug)
+
+            sendResponse(res, StatusCodes.OK, "Berhasil memuat detail kategori", result)
+        } catch (err) {
+            next(err)
+        }
+    }
+};

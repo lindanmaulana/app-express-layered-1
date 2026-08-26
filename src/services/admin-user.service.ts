@@ -46,4 +46,4 @@ export const adminUserService = {
         const result = await userRepository.deleteById(user.id)
         if (!result) throw new InternalServerError("Gagal menghapus user, silahkan coba lagi")
     } 
-}
+} 

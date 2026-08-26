@@ -24,9 +24,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 export const authenticateRefresh = (req: Request, res: Response, next: NextFunction) => {
     try {
         const refreshToken = req.cookies?.[JWT_DEFAULT.REFRESH_TOKEN]
-        console.log({refreshToken})
         if (!refreshToken) throw new UnauthorizedError("Akses ditolak: Sesi telah berakhir. Silahkan login kembali")
-
 
         req.user = verifyRefreshToken(refreshToken)
 

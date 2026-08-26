@@ -8,17 +8,17 @@ import type {
 } from "../models/user.model.js";
 
 export const userRepository = {
-  buildWhereClause: (filter: UserFilterParams) => {
+  buildWhereClause: (filters: UserFilterParams) => {
     const condition: string[] = []
     const values: (string | number | boolean)[] = []
 
-    if (filter.search) {
-      values.push(`%${filter.search}%`)
+    if (filters.search) {
+      values.push(`%${filters.search}%`)
       condition.push(`name ILIKE $${values.length}`)
     }
 
-    if (filter.role) {
-      values.push(filter.role)
+    if (filters.role) {
+      values.push(filters.role)
       condition.push(`role = $${values.length}`)
     }
 
@@ -27,18 +27,18 @@ export const userRepository = {
     return {whereSQL, values}
   },
 
-  findAll: async (filter: UserFilterParams): Promise<User[]> => {
-    const {whereSQL, values} = userRepository.buildWhereClause(filter)
+  findAll: async (filters: UserFilterParams): Promise<User[]> => {
+    const {whereSQL, values} = userRepository.buildWhereClause(filters)
     const queryValues = [...values]
 
     let paginationClause = ""
-    if (filter.limit) {
-      queryValues.push(filter.limit)
+    if (filters.limit) {
+      queryValues.push(filters.limit)
       paginationClause = ` LIMIT $${queryValues.length}`
     }
 
-    if (filter.offset) {
-      queryValues.push(filter.offset)
+    if (filters.offset) {
+      queryValues.push(filters.offset)
       paginationClause = ` OFFSET $${queryValues.length}`
     }
 
@@ -70,7 +70,7 @@ export const userRepository = {
     const query = `SELECT COUNT(id) AS total FROM users ${whereSQL}`
     const result = await pool.query(query, values)
 
-    return parseInt(result.rows[0].total ?? 10)
+    return parseInt(result.rows[0].total ?? "0", 10)
   },
 
   existsByEmail: async (email: string): Promise<boolean> => {

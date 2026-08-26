@@ -19,3 +19,15 @@ export interface ApiPaginationResponse<T = unknown> {
     data: T[] | []
     meta: PaginationMeta
 }
+
+export interface PaginationQuery {
+  page?: number | undefined
+  limit?: number | undefined
+}
+
+export interface PaginationOptions {
+  page: number
+  limit: number
+  skip: number
+  take: number
+}

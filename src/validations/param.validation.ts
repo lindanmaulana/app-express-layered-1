@@ -1,6 +1,10 @@
 import z from "zod";
-import { idSchema } from "./base.validation.js";
+import { idSchema, slugSchema } from "./base.validation.js";
 
 export const idParamSchema = z.object({
     id: idSchema
+})
+
+export const slugParamSchema = z.object({
+    slug: slugSchema
 })

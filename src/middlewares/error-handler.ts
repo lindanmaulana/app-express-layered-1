@@ -18,6 +18,7 @@ export const errorHandler = (
     console.error("💥 Expected Bussiness Error")
   }
 
+  // App Error
   if (isOperationalError) {
     const operationalErr = err as CustomAPIError
     const statusCode = typeof operationalErr.statusCode === "number" && operationalErr.statusCode >= 400 ? operationalErr.statusCode : StatusCodes.BAD_REQUEST
@@ -29,6 +30,7 @@ export const errorHandler = (
   }
 
 
+  // Validate Error ZOD
   if (err instanceof ZodError) {
     const formattedErrors = err.issues.map((e) => ({
       field: e.path.join("."),
@@ -42,6 +44,7 @@ export const errorHandler = (
     });
   }
 
+  // Json Parse Error
   if (typeof err === "object" && err !== null && "type" in err && err.type === "entity.parse.failed") {
     console.log({err})
     return res.status(400).json({
@@ -50,6 +53,7 @@ export const errorHandler = (
     });
   }
 
+  // DB Error
   if (typeof err === "object" && err !== null && "code" in err) {
     switch (err.code) {
       case "23505":
@@ -80,6 +84,7 @@ export const errorHandler = (
 
   console.error("💥 UNEXPECTED SERVER ERROR:", err);
 
+  // Error tidak diketahui
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
     message: "Terjadi kesalahan tidak terduga pada server, coba lagi nanti",

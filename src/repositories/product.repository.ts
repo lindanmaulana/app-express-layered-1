@@ -62,7 +62,7 @@ export const productRepository = {
     const query = `SELECT COUNT(id) AS total FROM products ${whereSQL}`;
     const result = await pool.query(query, params);
 
-    return parseInt(result.rows[0].total, 10);
+    return parseInt(result.rows[0].total ?? "0", 10);
   },
 
   findById: async (id: number): Promise<Product | null> => {

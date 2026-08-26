@@ -1,13 +1,12 @@
-import type {Request, Response, NextFunction} from "express"
-import type { RegisterDTO } from "../validations/auth.validation.js"
-import { authService } from "../services/auth.service.js"
+import type { NextFunction, Request, Response } from "express"
 import { StatusCodes } from "http-status-codes"
-import { sendResponse } from "../utils/response.util.js"
-import { MS } from "../constants/time.const.js"
 import { JWT_DEFAULT } from "../constants/jwt.constant.js"
-import type { AuthenticatedRequest } from "../types/express.type.js"
-import { getAuthUser } from "../utils/auth-user.util.js"
+import { MS } from "../constants/time.const.js"
+import { authService } from "../services/auth.service.js"
 import type { JwtPayload } from "../types/jwt.type.js"
+import { getAuthUser } from "../utils/auth-user.util.js"
+import { sendResponse } from "../utils/response.util.js"
+import type { RegisterDTO } from "../validations/auth.validation.js"
 
 
 export const authController = {
