@@ -6,11 +6,13 @@ import productRoutes from "./product.route.js"
 
 import adminUserRoutes from "./admin-user.route.js"
 import adminCategoryRoutes from "./admin-category.route.js"
+import adminProductRoutes from "./admin-product.route.js"
 
 const apiRouter = Router()
 
     apiRouter.use("/admin/users", adminUserRoutes)
     apiRouter.use("/admin/categories", adminCategoryRoutes)
+    apiRouter.use("/admin/products", adminProductRoutes)
 
     apiRouter.use("/auth", authRoutes)
     apiRouter.use("/users", userRoutes)
