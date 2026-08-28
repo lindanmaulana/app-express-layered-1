@@ -1,22 +1,31 @@
 import { Router } from "express";
-import authRoutes from "./auth.route.js"
-import userRoutes from "./user.routes.js"
-import categoryRoutes from "./category.route.js"
-import productRoutes from "./product.route.js"
 
-import adminUserRoutes from "./admin-user.route.js"
-import adminCategoryRoutes from "./admin-category.route.js"
-import adminProductRoutes from "./admin-product.route.js"
+import authRoutes from "./auth.route.js";
+import categoryRoutes from "./category.route.js";
+import productRoutes from "./product.route.js";
+import userRoutes from "./user.routes.js";
+import orderRoutes from "./order.route.js";
+import orderItemRoutes from "./order-item.route.js"
+
+import adminCategoryRoutes from "./admin-category.route.js";
+import adminProductRoutes from "./admin-product.route.js";
+import adminUserRoutes from "./admin-user.route.js";
+import adminOrderRoutes from "./admin-order.route.js";
+import adminOrderItemRoutes from "./admin-order-item.route.js"
 
 const apiRouter = Router()
 
     apiRouter.use("/admin/users", adminUserRoutes)
     apiRouter.use("/admin/categories", adminCategoryRoutes)
     apiRouter.use("/admin/products", adminProductRoutes)
+    apiRouter.use("/admin/orders", adminOrderRoutes)
+    apiRouter.use("/admin/order-items", adminOrderItemRoutes)
 
     apiRouter.use("/auth", authRoutes)
     apiRouter.use("/users", userRoutes)
     apiRouter.use("/categories", categoryRoutes)
     apiRouter.use("/products", productRoutes)
+    apiRouter.use("/orders", orderRoutes)
+    apiRouter.use("/order-items", orderItemRoutes)
 
 export default apiRouter

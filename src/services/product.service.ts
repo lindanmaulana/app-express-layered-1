@@ -57,6 +57,4 @@ export const productService = {
 
     return result;
   },
-
-
 };

@@ -31,7 +31,6 @@ export const authController = {
         }
     },
 
-
     login: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const payload: RegisterDTO = req.body

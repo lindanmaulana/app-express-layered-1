@@ -1,17 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 import type { Product } from "../models/product.model.js";
 import { productService } from "../services/product.service.js";
-import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../utils/response.util.js";
 import type {
-  BulkDeleteProductsDTO,
-  BulkRestockProductDTO,
-  ChangePriceProductDTO,
-  CreateProductDTO,
-  GetProductsQueryDTO,
-  ReduceStockProductDTO,
-  RestockProductDTO,
-  UpdateProductDTO,
+  GetProductsQueryDTO
 } from "../validations/product.validation.js";
 
 export const productController = {

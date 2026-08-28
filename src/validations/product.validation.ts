@@ -13,15 +13,12 @@ export const productSchema = z.object({
 })
 
 
-
 export const getProductsQuerySchema = paginationQuerySchema.extend({
     search: z.string().trim().optional(),
     min_price: z.coerce.number().positive("Harga minimal harus lebih dari 0").optional(),
     max_price: z.coerce.number().positive("Harga maksimal harus lebih dari 0").optional(),
-}).extend({
     category_id: idSchema.optional()
 })
-
 
 export const createProductSchema = productSchema.pick({
     category_id: true,
@@ -61,6 +58,7 @@ export const bulkDeleteProductsSchema = z.object({
     ids: z.array(idSchema)
 })
 
+export type ProductDTO = z.infer<typeof productSchema>
 
 export type GetProductsQueryDTO = z.infer<typeof getProductsQuerySchema>
 

@@ -1,3 +1,4 @@
+import type { PoolClient } from "pg";
 import pool from "../config/db.js";
 import type {
   ChangePriceProductData,
@@ -190,5 +191,27 @@ export const productRepository = {
     const result = await pool.query<Product>(query, [ids]);
 
     return result.rowCount ?? 0;
+  },
+
+  incrementStockWithTrx: async (
+    id: number,
+    dto: RestockProductData,
+    client: PoolClient
+  ): Promise<boolean> => {
+    const query = "UPDATE products SET stock = stock + $1 WHERE id = $2";
+    const result = await client.query<Product>(query, [dto.quantity, id]);
+
+    return (result.rowCount ?? 0) > 0;
+  },
+
+  decrementStockWithTrx: async (
+    id: number,
+    dto: ReduceStockProductData,
+    client: PoolClient
+  ): Promise<boolean> => {
+    const query = "UPDATE products SET stock = stock - $1 WHERE id = $2";
+    const result = await client.query<Product>(query, [dto.quantity, id]);
+
+    return (result.rowCount ?? 0) > 0;
   },
 };

@@ -125,7 +125,7 @@ export const adminProductService = {
     const client = await pool.connect();
 
     try {
-      await client.query("BEGIN");
+      await client.query("BEGIN"); 
 
       for (const item of items) {
         const isRestock = await productRepository.incrementStock(item.id, {
