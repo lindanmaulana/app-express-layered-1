@@ -45,12 +45,38 @@ export const orderController = {
         }
     },
 
+    createWithLock: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = getAuthUser(req) as JwtPayload
+            const payload = req.body as unknown as CreateOrderDTO
+
+            const result = await orderService.createWithLock(user, payload)
+
+            sendResponse(res, StatusCodes.OK, "Pesanan berhasil dibuat", result)
+        } catch (err) {
+            next(err)
+        }
+    },
+
     cancelOrder: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = getAuthUser(req) as JwtPayload
             const id = Number(req.params.id)
 
             await orderService.cancelOrder(user, id)
+
+            sendResponse(res, StatusCodes.OK, "Pesanan berhasil dibatalkan")
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    cancelOrderWithLock: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = getAuthUser(req) as JwtPayload
+            const id = Number(req.params.id)
+
+            await orderService.cancelWithLock(user, id)
 
             sendResponse(res, StatusCodes.OK, "Pesanan berhasil dibatalkan")
         } catch (err) {

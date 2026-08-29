@@ -28,5 +28,12 @@ export const orderItemRepository = {
         if (!createdOrderItem) throw new Error("Gagal membuat order item baru")
 
         return createdOrderItem
+    },
+
+    findAllByOrderIdWithTrx: async (orderId: number, client: PoolClient): Promise<OrderItem[]> => {
+        const query = "SELECT id, order_id, product_id, quantity, price_at_purchase, created_at, updated_at FROM order_items WHERE order_id = $1"
+        const orders = await client.query(query, [orderId])
+
+        return orders.rows
     }
 }

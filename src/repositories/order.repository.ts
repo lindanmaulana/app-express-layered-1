@@ -79,6 +79,13 @@ export const orderRepository = {
         return (result.rowCount ?? 0) > 0
     },
 
+    findByIdWithLock: async (id: number, client: PoolClient): Promise<Order | null> => {
+        const query = "SELECT id, user_id, total_amount, status, created_at, updated_at FROM orders WHERE id = $1 FROM UPDATE"
+        const order = await client.query<Order>(query, [id])
+
+        return order.rows[0] ?? null
+    },
+
     createWithTrx: async (data: CreateOrderData, client: PoolClient): Promise<Order> => {
         const query = "INSERT INTO orders (user_id, total_amount) VALUES ($1, $2) RETURNING id, user_id, total_amount, status, created_at, updated_at"
         const result = await client.query<Order>(query, [data.user_id, data.total_amount])

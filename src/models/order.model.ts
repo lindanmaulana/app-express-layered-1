@@ -12,8 +12,9 @@ export type Order = {
 }
 
 export type OrderResponse = Order
-
-
+export type OrderResponseWithItems = Order & {
+    items: OrderItem[]
+}
 
 // Pagination Filter
 export type GetOrdersQueryData = PaginationQuery & {
@@ -22,8 +23,7 @@ export type GetOrdersQueryData = PaginationQuery & {
 export type OrderFilterParams = Omit<GetOrdersQueryData, "page"> & { offset?: number }
 
 
-
-
+// GET with order items
 export type OrderWithOrderItems = {
     order: Order & {
         order_items: OrderItem[]
@@ -36,7 +36,6 @@ export type GetUserOrdersWithOrderItemsResponse = {
 }
 
 export type CreateOrderData = Pick<Order, "user_id" | "total_amount">
-
 
 type UpdateOrder = Partial<Pick<Order,  "total_amount" | "status">>
 export type UpdateOrderData = {

@@ -193,6 +193,13 @@ export const productRepository = {
     return result.rowCount ?? 0;
   },
 
+  findByIdWithLock: async (id: number, client: PoolClient): Promise<Product | null> => {
+    const query = "SELECT id, category_id, name, sku, price, stock, created_at FROM products WHERE id = $1 FOR UPDATE"
+    const result = await client.query<Product>(query, [id])
+
+    return result.rows[0] ?? null
+  },
+
   incrementStockWithTrx: async (
     id: number,
     dto: RestockProductData,
