@@ -18,8 +18,6 @@ export const getOrdersQuerySchema = paginationQuerySchema.extend({
 
 const orderItem = z.object({
     product_id: z.number().int("Produk ID harus berupa bilaangan bulat").positive("Produk ID harus berupa angka positif"),
-    product_name: z.string().trim().min(1, "Nama produk tidak boleh kosong"),
-    product_price: z.number().positive("Harga produk harus berupa angka positif"),
     quantity: z.number().int("Jumlah item harus berupa bilangan bulat").positive("Jumlah item haru berupa angka positif")
 })
 

@@ -7,6 +7,7 @@ export type Order = {
     user_id: number
     total_amount: number
     status: OrderStatus
+    idempotency_key: string
     created_at: Date
     updated_at: Date
 }
@@ -35,7 +36,12 @@ export type GetUserOrdersWithOrderItemsResponse = {
     meta: PaginationMeta
 }
 
-export type CreateOrderData = Pick<Order, "user_id" | "total_amount">
+export type CreateOrderData = Pick<Order, "user_id" | "total_amount" | "idempotency_key">
+export type ValidOrderItem = {
+    product_id: number
+    quantity: number
+    product_price: number
+}
 
 type UpdateOrder = Partial<Pick<Order,  "total_amount" | "status">>
 export type UpdateOrderData = {

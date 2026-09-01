@@ -1,0 +1,59 @@
+====================================================================================================
+LAPORAN UJI KONKURENSI DATABASE (4 REQUEST BERSAMAAN - EKSPERIMEN TRANSAKSI)
+====================================================================================================
+
+Level Isolasi       | Status Request (1 s/d 4)        | Stok Akhir | Keterangan / Perilaku Sistem
+----------------------------------------------------------------------------------------------------
+Read Committed      | Req 1: 201 Created              | -45        | Terjadi Lost Update total. Keempat 
+                    | Req 2: 201 Created              |            | transaksi membaca data stok awal yang 
+                    | Req 3: 201 Created              |            | sama secara paralel, lolos validasi 
+                    | Req 4: 201 Created              |            | aplikasi, dan saling menimpa hingga 
+                    |                                 |            | stok terjun bebas ke angka minus.
+----------------------------------------------------------------------------------------------------
+Repeatable Read     | Req 1: 400 Bad Request          | 0          | Aman dari Lost Update. Transaksi 
+                    | Req 2: 201 Created              |            | berhasil commit, sementara request 
+                    | Req 3: 400 Bad Request          |            | konkuren tertahan row lock, lalu 
+                    | Req 4: 400 Bad Request          |            | mendeteksi stok habis dan ditolak.
+----------------------------------------------------------------------------------------------------
+Serializable        | Req 1: 201 Created              | 0          | Tingkat isolasi paling ketat. Mencegah 
+                    | Req 2: 409 Conflict             |            | Lost Update dan mendeteksi konflik 
+                    | Req 3: 400 Bad Request          |            | serialisasi database secara langsung, 
+                    | Req 4: 400 Bad Request          |            | memastikan konsistensi stok mutlak.
+====================================================================================================
+
+
+
+====================================================================================================
+DOKUMENTASI AKHIR: ANALISIS KONKURENSI & ISOLASI TRANSAKSI POSTGRESQL
+====================================================================================================
+
+1. Latar Belakang Masalah
+   Sistem pemesanan stok sering mengalami celah integritas data berupa "Lost Update" akibat multiple 
+   request konkuren yang membaca state data awal secara bersamaan sebelum proses pengurangan stok terjadi.
+
+2. Hasil Pengujian Empiris (4 Request Konkuren):
+   
+   - Read Committed:
+     * Perilaku: Keempat request sukses mengeksekusi proses secara paralel tanpa saling menunggu.
+     * Hasil: Seluruh request mengembalikan status `201 Created` dan stok barang terjun bebas ke minus (-45).
+     * Kesimpulan: Gagal mencegah Lost Update karena pembacaan data awal tidak diisolasi terhadap transaksi lain.
+
+   - Repeatable Read:
+     * Perilaku: Request pertama sukses commit, sementara request konkuren tertahan oleh row-level locking.
+     * Hasil: Kombinasi `201 Created` dan `400 Bad Request` (stok habis). Stok akhir aman di angka `0`.
+     * Kesimpulan: Efektif mengamankan integritas data dengan menahan transaksi konkuren hingga baris data 
+       tersedia kembali untuk dibaca ulang secara konsisten.
+
+   - Serializable:
+     * Perilaku: Tingkat proteksi paling ketat berbasis deteksi konflik dependensi transaksi.
+     * Hasil: Menghasilkan respons sukses (`201`), konflik isolasi database (`409 Conflict`), serta validasi stok 
+       habis (`400 Bad Request`). Stok akhir terkunci aman di angka `0`.
+     * Kesimpulan: Mencegah anomali konkuren tingkat tinggi dengan langsung menggagalkan transaksi yang 
+       berpotensi merusak konsistensi global database.
+
+3. Rekomendasi Penerapan Sistem
+   - Gunakan minimal **Repeatable Read** atau **Serializable** pada proses bisnis kritis seperti manajemen stok, 
+     saldo dompet digital, atau pemesanan tiket agar terhindar dari manipulasi data konkuren.
+   - Pastikan seluruh rantai logika operasional (dari tahap `SELECT` pengecekan hingga `UPDATE` pengurangan) 
+     selalu berada di dalam cakupan blok transaksi yang sama (`BEGIN ... COMMIT`).
+====================================================================================================

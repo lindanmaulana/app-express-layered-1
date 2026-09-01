@@ -10,6 +10,8 @@ export const generatedAccessToken = (payload: JwtPayload): string => {
 
     const expiresIn = (env.JWT_ACCESS_EXPIRES_IN ?? "15m") as StringValue
 
+    console.log({expiresIn})
+
     return jwt.sign(payload, env.JWT_ACCESS_TOKEN, {
         expiresIn: expiresIn
     })

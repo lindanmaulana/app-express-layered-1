@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { ZodError } from "zod";
+import { success, ZodError } from "zod";
 import { CustomAPIError } from "../errors/index.js";
 
 export const errorHandler = (
@@ -78,6 +78,12 @@ export const errorHandler = (
           success: false,
           message: "Kolom wajib pada database tidak boleh bernilai null",
         });
+
+      case "40001":  // Error Concurrent Transactions (Serializable)
+        return res.status(StatusCodes.CONFLICT).json({
+          success: false,
+          message: "Transaksi bersamaan terdeteksi, silahkan coba beberapa saat lagi."
+        })
     }
   }
 

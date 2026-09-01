@@ -87,8 +87,8 @@ export const orderRepository = {
     },
 
     createWithTrx: async (data: CreateOrderData, client: PoolClient): Promise<Order> => {
-        const query = "INSERT INTO orders (user_id, total_amount) VALUES ($1, $2) RETURNING id, user_id, total_amount, status, created_at, updated_at"
-        const result = await client.query<Order>(query, [data.user_id, data.total_amount])
+        const query = "INSERT INTO orders (user_id, total_amount, idempotency_key) VALUES ($1, $2, $3) RETURNING id, user_id, total_amount, status, idempotency_key, created_at, updated_at"
+        const result = await client.query<Order>(query, [data.user_id, data.total_amount, data.idempotency_key])
 
         const createdOrder = result.rows[0]
         if (!createdOrder) throw new Error("Gagal membuat order baru")

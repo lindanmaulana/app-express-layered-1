@@ -8,7 +8,6 @@ export type OrderItem = {
     updated_at: Date
 }
 
-
 export type OrderItemRespoonse = OrderItem
 
 export type CreateOrderItemData = Pick<OrderItem, "order_id" | "product_id" | "quantity" | "price_at_purchase">

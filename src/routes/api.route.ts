@@ -13,6 +13,8 @@ import adminUserRoutes from "./admin-user.route.js";
 import adminOrderRoutes from "./admin-order.route.js";
 import adminOrderItemRoutes from "./admin-order-item.route.js"
 
+import orderPlaygroundRoutes from "./order-playground.route.js"
+
 const apiRouter = Router()
 
     apiRouter.use("/admin/users", adminUserRoutes)
@@ -28,4 +30,7 @@ const apiRouter = Router()
     apiRouter.use("/orders", orderRoutes)
     apiRouter.use("/order-items", orderItemRoutes)
 
+
+    apiRouter.use("/order-playgrounds", orderPlaygroundRoutes)
+    
 export default apiRouter

@@ -5,11 +5,19 @@ interface RequestValidators {
   body?: ZodType<unknown>;
   query?: ZodType<unknown>;
   params?: ZodType<unknown>;
+  headers?: ZodType<unknown>
 }
 
 export const validate = (validators: RequestValidators) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (validators.headers) {
+        const idempotencyKey = req.headers['idempotency-key'] ?? null
+        if (idempotencyKey) {
+          req.idempotencyKey = await validators.headers.parseAsync(idempotencyKey) as string
+        }
+      }
+
       if (validators.params) {
         req.params = (await validators.params.parseAsync(req.params)) as any;
       }

@@ -11,6 +11,7 @@ import { userRepository } from "../repositories/user.repository.js";
 import type { JwtPayload } from "../types/jwt.type.js";
 import { parsePagination } from "../utils/pagination.util.js";
 import type { CreateOrderDTO, GetOrdersQueryDTO } from "../validations/order.validation.js";
+import {v4 as uuidv4} from "uuid"
 
 export const orderService = {
     getMyOrders: async (user: JwtPayload, query: GetOrdersQueryDTO): Promise<GetUserOrdersWithOrderItemsResponse> => {
@@ -21,20 +22,15 @@ export const orderService = {
         const [orders, totalData] = await Promise.all([orderRepository.findAll({limit, offset: skip, status: query.status}, checkUser?.id), orderRepository.countAll({limit, offset: skip, status: query.status}, checkUser?.id)])
         const totalPages = Math.ceil(totalData / limit)
 
-        const orderWithOrderItems: OrderWithOrderItems[] = await Promise.all(orders.map(async (order) => {
+        const orderWithItems: OrderWithOrderItems[] = []
+        for (const order of orders) {
             const orderItems = await orderItemRepository.findAllByOrderId(order.id)
 
-            return {
-                order: {
-                    ...order,
-                    order_items: orderItems
-                },
-                
-            }
-        }))
+            orderWithItems.push({order: {...order, order_items: orderItems}})
+        }
 
         return {
-            data: orderWithOrderItems,
+            data: orderWithItems,
 
             meta: {
                 page: page,
@@ -63,18 +59,19 @@ export const orderService = {
         let totalPrice: number = 0
         for(const item of dto.items) {
             const checkProduct = await productRepository.findById(item.product_id)
-            if (!checkProduct) throw new NotFoundError(`Produk ${item.product_name} tidak ditemukan`)
+            if (!checkProduct) throw new NotFoundError(`Produk dengan ID ${item.product_id} tidak ditemukan`)
 
             if (checkProduct.stock < item.quantity) throw new BadRequestError(`Stok produk ${checkProduct.name} tidak cukup, sisa ${checkProduct.stock} stok lagi`)
 
             totalPrice += checkProduct.price * item.quantity
         }
 
+        const newUuid = uuidv4()
         const client: PoolClient = await pool.connect()
         try {
             await client.query("BEGIN")
 
-            const result = await orderRepository.createWithTrx({user_id: user.userId, total_amount: totalPrice}, client)
+            const result = await orderRepository.createWithTrx({user_id: user.userId, total_amount: totalPrice, idempotency_key: newUuid}, client)
             for (const item of dto.items) {
                 await orderItemRepository.createWithTrx({order_id: result.id, product_id: item.product_id, quantity: item.quantity, price_at_purchase: item.product_price}, client)
 
@@ -128,9 +125,9 @@ export const orderService = {
     createWithLock: async (user: JwtPayload, dto: CreateOrderDTO): Promise<OrderResponse> => {
         const checkUser = await userRepository.findById(user.userId)
         if (!checkUser) throw new NotFoundError("Pengguna tidak ditemukan")
-
         if (!dto.items || dto.items.length === 0) throw new BadRequestError("Pesanan tidak boleh kosong")
 
+        const newUuid = uuidv4()
         const client: PoolClient = await pool.connect()
         try {
             await client.query('BEGIN')
@@ -138,14 +135,14 @@ export const orderService = {
                 let totalPrice: number = 0
                 for (const item of dto.items) {
                     const checkProduct = await productRepository.findByIdWithLock(item.product_id, client)
-                    if (!checkProduct) throw new NotFoundError(`Produk ${item.product_name} tidak ditemukan`)
+                    if (!checkProduct) throw new NotFoundError(`Produk dengan ID ${item.product_id} tidak ditemukan`)
 
                     if (checkProduct.stock < item.quantity) throw new BadRequestError(`Stok produk ${checkProduct.name} tidak cukup, sisa ${checkProduct.stock} stok lagi`)
 
                         totalPrice += checkProduct.price * item.quantity
                 }
 
-                const newOrder = await orderRepository.createWithTrx({user_id: user.userId, total_amount: totalPrice}, client)
+                const newOrder = await orderRepository.createWithTrx({user_id: user.userId, total_amount: totalPrice, idempotency_key: newUuid}, client)
                 for (const item of dto.items) {
                     await orderItemRepository.createWithTrx({order_id: newOrder.id, product_id: item.product_id, quantity: item.quantity, price_at_purchase: item.product_price}, client)
 
@@ -162,7 +159,7 @@ export const orderService = {
         } finally {
             client.release()
         }
-    },
+    },  
 
     cancelWithLock: async (user: JwtPayload, id: number): Promise<void> => {
         const checkUser = await userRepository.findById(user.userId)
@@ -193,5 +190,5 @@ export const orderService = {
         } finally {
             client.release()
         }
-    }
+    },
 }
