@@ -44,5 +44,18 @@ export const orderPlayGroundController = {
         } catch (err) {
             next(err)
         }
+    },
+
+    createWithRepeatableAndLock: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = getAuthUser(req) as JwtPayload
+            const payload = req.body as CreateOrderDTO
+
+            const result = await orderPlaygroundService.createWithRepeatableReadAndLock(user, payload)
+
+            sendResponse(res, StatusCodes.CREATED, "Pesanan berhasil dibuat, ---- Repeatable Read and Lock FOR UPDATE", result)
+        } catch (err) {
+            next(err)
+        }
     }
 }

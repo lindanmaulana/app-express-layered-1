@@ -11,4 +11,7 @@ const router = Router()
     router.post("/repeatable-read", validate({ body: createOrderSchema }), authenticate, authorizeRoles(USER_ROLE.USER), orderPlayGroundController.createWithRepeatableRead)
     router.post("/serializable", validate({ body:createOrderSchema }), authenticate, authorizeRoles(USER_ROLE.USER), orderPlayGroundController.createWithSerializable)
 
+    //  TESTING SERVICE ini yg nerapin repeatable read and locking FOR UPDATE
+    router.post("/repeatable-lock", validate({ body: createOrderSchema}), authenticate, authorizeRoles(USER_ROLE.USER), orderPlayGroundController.createWithRepeatableAndLock)
+
 export default router
