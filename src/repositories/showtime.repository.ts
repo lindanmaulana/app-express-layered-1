@@ -1,28 +1,31 @@
 import type { PoolClient } from "pg";
-import type { CreateShowtimeData, Showtime, ShowtimeFilterParams, UpdateShotimeData } from "../models/showtime.model.js";
 import pool from "../config/db.js";
+import type { CreateShowtimeData, Showtime, ShowtimeFilterParams, UpdateShotimeData } from "../models/showtime.model.js";
+import type { SortType } from "../types/api.type.js";
+import { SORTABLE_COLUMNS } from "../constants/showtime.constant.js";
 
 export const showtimeRepository = {
-    buildWhereClause: (filters: ShowtimeFilterParams): { whereSQL: string, values: (string | number)[] } => {
+    buildWhereClause: (filters: ShowtimeFilterParams): { whereSQL: string, values: (string | SortType | number)[] } => {
         let condition: string[] = []
-        let values: (string | number)[] = []
+        let values: (string | SortType | number)[] = []
 
-        if (filters.search) {
+        if (filters.search !== undefined) {
             values.push(`%${filters.search}%`)
-            condition.push(`(movie_name ILIKE $${values.length} OR studio_name ILIKE $${values.length})`)
+            condition.push(`(movie_title ILIKE $${values.length} OR studio_name ILIKE $${values.length})`)
+            // condition.push(`(movie_title ILIKE $${values.length})`)
         }
 
-        if (filters.date) {
+        if (filters.date !== undefined) {
             values.push(filters.date)
             condition.push(`broadcast_time = $${values.length}`)
         }
 
-        if (filters.startDate) {
+        if (filters.startDate !== undefined) {
             values.push(filters.startDate)
             condition.push(`broadcast_time >= $${values.length}`)
         }
 
-        if (filters.endDate) {
+        if (filters.endDate !== undefined) {
             values.push(filters.endDate)
             condition.push(`broadcast_time <= $${values.length}`)
         }
@@ -36,8 +39,11 @@ export const showtimeRepository = {
         const {whereSQL, values} = showtimeRepository.buildWhereClause(filters)
         const queryValues = [...values]
 
-        let paginationClause = ''
+        const sortColumn: string = SORTABLE_COLUMNS[filters.sortBy as keyof typeof SORTABLE_COLUMNS ?? SORTABLE_COLUMNS.createdAt] ?? SORTABLE_COLUMNS.createdAt
+        const sortOrder = filters.sortOrder?.toUpperCase() === "DESC" ? "DESC" : "ASC"
+        let sortClause: string = `ORDER BY ${sortColumn} ${sortOrder}`
 
+        let paginationClause = ''
         if (filters.limit) {
             queryValues.push(filters.limit)
             paginationClause += ` LIMIT $${queryValues.length}`
@@ -48,7 +54,7 @@ export const showtimeRepository = {
             paginationClause += ` OFFSET $${queryValues.length}`
         }
 
-        const query = `SELECT id, movie_title, studio_name, broadcast_time, created_at, updated_at FROM showtimes ${whereSQL} ORDER BY id DESC ${paginationClause}`
+        const query = `SELECT id, movie_title, studio_name, broadcast_time, created_at, updated_at FROM showtimes ${whereSQL} ${sortClause} ${paginationClause}`
         const result = await pool.query<Showtime>(query, queryValues)
 
         return result.rows

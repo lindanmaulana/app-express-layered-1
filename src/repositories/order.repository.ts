@@ -39,7 +39,7 @@ export const orderRepository = {
             paginationClause += ` OFFSET $${queryValues.length}`
         }
 
-        const query = `SELECT id, user_id, total_amount, status, created_at, updated_at FROM orders ${whereSQL} ORDER BY id DESC ${paginationClause}`
+        const query = `SELECT id, user_id, total_amount, status, created_at, updated_at FROM orders ${whereSQL} ORDER BY created_at DESC ${paginationClause}`
         const orders = await pool.query<Order>(query, queryValues)
 
         return orders.rows

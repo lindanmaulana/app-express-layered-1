@@ -8,7 +8,7 @@ import type { GetProductsQueryDTO } from "../validations/product.validation.js";
 export const categoryController = {
     getAll: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const payloadQuery = req.query as unknown as GetCategoriesQueryDTO
+            const payloadQuery = req.parsedQuery as GetCategoriesQueryDTO
             const result = await categoryService.getAll(payloadQuery)
 
             sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat data kategori", result.data, result.meta)

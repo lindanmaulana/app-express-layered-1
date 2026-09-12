@@ -29,6 +29,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.6.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "http-status-codes": "^2.3.0",

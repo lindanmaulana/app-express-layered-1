@@ -1,4 +1,5 @@
 import z from "zod"
+import { SORTABLE_ORDER, SORTABLE_ORDER_VALUES } from "../constants/sort-order.constant.js"
 
 
 export const idSchema = z.coerce.number().int().positive("ID harus berupa angka positif")
@@ -7,6 +8,7 @@ export const positiveIntSchema = z.number().int("Jumlah harus berupa bilangan bu
 export const positivePriceSchema = z.number().positive("Harga harus lebih dari 0")
 
 export const paginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(10)
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    sortOrder: z.string().toUpperCase().pipe(z.enum(SORTABLE_ORDER_VALUES)).default(SORTABLE_ORDER.ASC)
 })

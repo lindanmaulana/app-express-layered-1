@@ -84,6 +84,13 @@ export const errorHandler = (
           success: false,
           message: "Transaksi bersamaan terdeteksi, silahkan coba beberapa saat lagi."
         })
+
+      case "42601": // Error syntax query error
+          console.error("Database Syntax Error:", err);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "Terjadi kesalahan pada struktur "
+        })
     }
   }
 

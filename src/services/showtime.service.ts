@@ -2,11 +2,10 @@ import { NotFoundError } from "../errors/not-found.js";
 import type { paginatedShowtimesResult, ShowtimeResponse } from "../models/showtime.model.js";
 import { showtimeRepository } from "../repositories/showtime.repository.js";
 import { parsePagination } from "../utils/pagination.util.js";
-import type { GetShowtimesQueryDTO } from "../validations/showtime.validation.js";
+import { type GetShowtimesQueryDTO } from "../validations/showtime.validation.js";
 
 export const showtimeService = {
     getAll: async (query: GetShowtimesQueryDTO): Promise<paginatedShowtimesResult> => {
-        console.log({ query })
         const { page, limit, skip } = parsePagination(query)
 
         const [showtimes, totalData] = await Promise.all([ await showtimeRepository.findAll({...query, limit, offset: skip}), await showtimeRepository.countAll({ ...query, limit, offset: skip }) ])

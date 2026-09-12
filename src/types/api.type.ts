@@ -23,6 +23,7 @@ export interface ApiPaginationResponse<T = unknown> {
 export interface PaginationQuery {
   page?: number | undefined
   limit?: number | undefined
+  sortOrder?: string | undefined
 }
 
 export interface PaginationOptions {
@@ -30,4 +31,9 @@ export interface PaginationOptions {
   limit: number
   skip: number
   take: number
+}
+
+export interface SortType {
+  asc: "ASC",
+  desc: "DESC"
 }

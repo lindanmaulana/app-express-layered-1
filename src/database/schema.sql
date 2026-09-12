@@ -53,8 +53,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     quantity INT NOT NULL,
     price_at_purchase NUMERIC(12, 2) NOT NULL,
 
-    ADD CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    ADD CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 )
 
 
@@ -66,8 +66,14 @@ CREATE TABLE showtimes (
     studio_name VARCHAR(100) NOT NULL,
     broadcast_time TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
+
+CREATE EXTENSION pg_trgm;
+CREATE INDEX idx_showtime_movie_title_trgm ON showtimes USING gin (movie_title gin_trgm_ops);
+CREATE INDEX idx_showtime_studio_name_trgm ON showtimes USING gin (studio_name gin_trgm_ops);
+
+CREATE INDEX idx_showtime_created_at ON showtimes (created_at DESC);
 
 CREATE TABLE seats (
     id SERIAL PRIMARY KEY,

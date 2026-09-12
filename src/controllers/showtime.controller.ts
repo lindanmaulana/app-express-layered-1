@@ -7,7 +7,7 @@ import { StatusCodes } from "http-status-codes";
 export const showtimeController = {
     getAll: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query as GetShowtimesQueryDTO
+            const query = req.parsedQuery as GetShowtimesQueryDTO
             const result = await showtimeService.getAll(query)
 
             sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat data film", result.data, result.meta)

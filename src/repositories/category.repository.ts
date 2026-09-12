@@ -1,4 +1,6 @@
 import pool from "../config/db.js";
+import { SORTABLE_COLUMNS, SORTABLE_COLUMNS_VALUE } from "../constants/category.constant.js";
+import { SORTABLE_ORDER } from "../constants/sort-order.constant.js";
 import type { Category, CategoryFilterParams, CreateCategoryData, GetCategoriesQueryData, UpdateCategoryData } from "../models/category.model.js";
 
 export const categoryRepository = {
@@ -20,6 +22,10 @@ export const categoryRepository = {
         const {whereSQL, values} = categoryRepository.buildWhereClause(filters)
         const queryValues = [...values]
 
+        const sortBy: string = SORTABLE_COLUMNS[filters.sortBy as keyof typeof SORTABLE_COLUMNS ?? SORTABLE_COLUMNS.createdAt] ?? SORTABLE_COLUMNS.createdAt
+        const sortOrder = filters.sortOrder?.toUpperCase() === SORTABLE_ORDER.DESC ? SORTABLE_ORDER.DESC : SORTABLE_ORDER.ASC
+        const sortClause = ` ORDER BY ${sortBy} ${sortOrder}`
+
         let paginationClause = ""
         if (filters.limit) {
             queryValues.push(filters.limit)
@@ -31,7 +37,7 @@ export const categoryRepository = {
             paginationClause += ` OFFSET $${queryValues.length}`
         }
 
-        const query = `SELECT id, name, slug, created_at, updated_at FROM categories ${whereSQL} ORDER BY id DESC ${paginationClause}`
+        const query = `SELECT id, name, slug, created_at, updated_at FROM categories ${whereSQL} ${sortClause} ${paginationClause}`
         const result = await pool.query<Category>(query, queryValues)
 
         return result.rows

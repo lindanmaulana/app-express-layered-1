@@ -1,4 +1,5 @@
 import z from "zod";
+import { SORTABLE_COLUMNS, SORTABLE_COLUMNS_VALUE } from "../constants/showtime.constant.js";
 import { idSchema, paginationQuerySchema } from "./base.validation.js";
 
 export const showtimeSchema = z.object({
@@ -10,12 +11,17 @@ export const showtimeSchema = z.object({
     updated_at: z.iso.datetime()
 })
 
-export const getShowtimesQuerySchema = paginationQuerySchema.extend({
-    search: z.string().trim(),
-    date: z.iso.datetime(), 
-    startDate: z.iso.datetime(), 
-    endDate: z.iso.datetime(), 
-}).partial()
+
+const advancedQuerySchema = paginationQuerySchema.extend({
+    sortBy: z.enum(SORTABLE_COLUMNS_VALUE).default(SORTABLE_COLUMNS.createdAt)
+})
+
+export const getShowtimesQuerySchema = advancedQuerySchema.extend({
+    search: z.string().trim().optional(),
+    date: z.iso.datetime().optional(), 
+    startDate: z.iso.datetime().optional(), 
+    endDate: z.iso.datetime().optional(), 
+})
 
 
 export const createShowtimeSchema = showtimeSchema.pick({

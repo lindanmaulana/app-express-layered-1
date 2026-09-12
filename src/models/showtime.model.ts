@@ -1,4 +1,4 @@
-import type { PaginationMeta, PaginationQuery } from "../types/api.type.js"
+import type { PaginationMeta, PaginationQuery, SortType } from "../types/api.type.js"
 
 export interface Showtime {
     id: number
@@ -18,6 +18,7 @@ export type GetShowtimesQueryData = PaginationQuery & {
     date?: string | undefined
     startDate?: string | undefined
     endDate?: string | undefined
+    sortBy?: string | undefined
 }
 export type ShowtimeFilterParams = Omit<GetShowtimesQueryData, "page"> & { offset?: number }
 

@@ -30,6 +30,8 @@ export const validate = (validators: RequestValidators) => {
         }
 
         Object.assign(req.query, parsedQuery)
+
+        req.parsedQuery = parsedQuery
       }
 
       if (validators.body) {

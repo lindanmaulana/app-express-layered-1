@@ -1,3 +1,4 @@
+import type { SortableColumns } from "../constants/category.constant.js"
 import type { PaginationMeta, PaginationQuery } from "../types/api.type.js"
 import type { ProductResponse } from "./product.model.js"
 
@@ -13,6 +14,7 @@ export type CategoryResponse = Category
 
 export type GetCategoriesQueryData = PaginationQuery & {
     search?: string | undefined
+    sortBy?: SortableColumns | undefined
 }
 
 export type CategoryFilterParams = Omit<GetCategoriesQueryData, "page"> & { offset?: number }

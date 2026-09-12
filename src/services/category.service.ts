@@ -10,7 +10,7 @@ export const categoryService = {
     getAll: async (query: GetCategoriesQueryDTO): Promise<paginatedCategoriesResult> => {
         const {page, limit, skip} = parsePagination(query)
 
-        const [categories, totalData] = await Promise.all([categoryRepository.findAll({search: query.search, limit, offset: skip}), categoryRepository.countAll({search: query.search, limit, offset: skip})])
+        const [categories, totalData] = await Promise.all([categoryRepository.findAll({...query, search: query.search, limit, offset: skip}), categoryRepository.countAll({...query, search: query.search, limit, offset: skip})])
         const totalPages = Math.ceil(totalData / limit)
 
         return {

@@ -1,5 +1,6 @@
 import z from "zod";
 import { idSchema, paginationQuerySchema } from "./base.validation.js";
+import { SORTABLE_COLUMNS, SORTABLE_COLUMNS_VALUE } from "../constants/category.constant.js";
 
 export const categorySchema = z.object({
     id: idSchema,
@@ -12,6 +13,7 @@ export const categorySchema = z.object({
 
 export const getCategoriesQuerySchema = paginationQuerySchema.extend({
     search: z.string().trim().optional(),
+    sortBy: z.enum(SORTABLE_COLUMNS_VALUE).default(SORTABLE_COLUMNS.createdAt)
 })
 
 export const createCategorySchema = categorySchema.pick({
