@@ -1,12 +1,6 @@
-    // id SERIAL PRIMARY KEY,
-    // name VARCHAR(100) NOT NULL,
-    // slug VARCHAR(120) UNIQUE NOT NULL,
-    // created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    // updated_at TIMESTAMP DEFAULT 
-    
-
 import { faker } from "@faker-js/faker"
 import pg from "pg";
+import slugify from 'slugify';
 import "dotenv/config";
 
 const pool = new pg.Pool({
@@ -33,7 +27,9 @@ async function seedData() {
       const slugs = []
 
       for (let j = 0; j < batchSize; j++) {
-        names.push(faker.lorem.sentence(3));
+        const generatedName = faker.lorem.sentence(3)
+        
+        names.push(generatedName);
         slugs.push(slugify(generatedName, { lower: true, strict: true }));
       }
 

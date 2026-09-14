@@ -1,5 +1,5 @@
 import type { SortableColumns } from "../constants/category.constant.js"
-import type { PaginationMeta, PaginationQuery } from "../types/api.type.js"
+import type { CursorPaginationMeta, CursorPaginationQuery, PaginationMeta, PaginationQuery } from "../types/api.type.js"
 import type { ProductResponse } from "./product.model.js"
 
 export type Category = {
@@ -10,17 +10,38 @@ export type Category = {
     updated_at: Date
 }
 
-export type CategoryResponse = Category
+
+
+
+
+
+
 
 export type GetCategoriesQueryData = PaginationQuery & {
     search?: string | undefined
     sortBy?: SortableColumns | undefined
 }
+export type CategoryFilterParams = Omit<GetCategoriesQueryData, "page"> & { offset?: number, cursor?: number | string | undefined }
 
-export type CategoryFilterParams = Omit<GetCategoriesQueryData, "page"> & { offset?: number }
-export type paginatedCategoriesResult = {
+export type CreateCategoryData = Pick<Category, "name" | "slug">
+export type UpdateCategoryData = {
+    [K in keyof CreateCategoryData]?: Category[K] | undefined
+}
+
+
+
+
+
+
+export type CategoryResponse = Category
+export type paginatedCategoriesResponse = {
     data: Category[],
     meta: PaginationMeta
+}
+
+export type cursorPaginatedCategoriesResponse = {
+    data: Category[]
+    meta: CursorPaginationMeta
 }
 
 export type GetCategoryByIdWithProductsResponse = {
@@ -30,10 +51,4 @@ export type GetCategoryByIdWithProductsResponse = {
     },
 
     meta: PaginationMeta
-}
-
-export type CreateCategoryData = Pick<Category, "name" | "slug">
-
-export type UpdateCategoryData = {
-    [K in keyof CreateCategoryData]?: Category[K] | undefined
 }

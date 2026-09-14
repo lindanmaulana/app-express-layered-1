@@ -2,7 +2,6 @@
 export const SORTABLE_COLUMNS = {
     createdAt: "created_at",
     name: "name",
-    slug: "slug"
 } as const
 
 

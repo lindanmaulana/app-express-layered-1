@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { categoryService } from "../services/category.service.js";
 import { sendPaginationResponse, sendResponse } from "../utils/response.util.js";
-import type { GetCategoriesQueryDTO } from "../validations/category.validation.js";
+import type { GetCategoriesCursorQueryDTO, GetCategoriesQueryDTO } from "../validations/category.validation.js";
 import type { GetProductsQueryDTO } from "../validations/product.validation.js";
 
 export const categoryController = {

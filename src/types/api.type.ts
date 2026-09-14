@@ -37,3 +37,32 @@ export interface SortType {
   asc: "ASC",
   desc: "DESC"
 }
+
+
+
+
+
+
+export interface CursorPaginationMeta {
+  limit: number
+  hasNextPage: boolean
+  nextCursor?: string | number | null
+}
+
+export interface ApiCursorPaginationResponse<T = unknown> {
+  success: boolean
+  message: string
+  data: T[] | T
+  meta: CursorPaginationMeta
+}
+
+export interface CursorPaginationQuery {
+  limit?: number | undefined
+  sortOrder?: string | undefined
+  cursor?: string | number | undefined
+}
+
+export interface CursorPaginationOptions {
+  cursor?: string | number | undefined
+  limit: number
+}

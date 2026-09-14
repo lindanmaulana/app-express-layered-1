@@ -1,10 +1,21 @@
 import type { NextFunction, Request, Response } from "express"
 import { StatusCodes } from "http-status-codes"
 import { adminCategoryService } from "../services/admin-category.service.js"
-import { sendResponse } from "../utils/response.util.js"
-import type { CreateCategoryDTO, UpdateCategoryDTO } from "../validations/category.validation.js"
+import { sendPaginationResponse, sendResponse } from "../utils/response.util.js"
+import type { CreateCategoryDTO, GetCategoriesCursorQueryDTO, UpdateCategoryDTO } from "../validations/category.validation.js"
 
 export const adminCategoryController = {
+    getAllCursor: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const payloadQuery = req.parsedQuery as GetCategoriesCursorQueryDTO
+            const result = await adminCategoryService.getAllCursor(payloadQuery)
+    
+            sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat data kategori", result.data, result.meta)
+        } catch (err) {
+            next(err)
+        }
+    },
+
     getById: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id = Number(req.params.id)

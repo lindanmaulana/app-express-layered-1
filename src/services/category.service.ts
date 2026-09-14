@@ -1,5 +1,5 @@
 import { NotFoundError } from "../errors/not-found.js";
-import type { CategoryResponse, GetCategoryByIdWithProductsResponse, paginatedCategoriesResult } from "../models/category.model.js";
+import type { CategoryResponse, GetCategoryByIdWithProductsResponse, paginatedCategoriesResponse } from "../models/category.model.js";
 import { categoryRepository } from "../repositories/category.repository.js";
 import { productRepository } from "../repositories/product.repository.js";
 import { parsePagination } from "../utils/pagination.util.js";
@@ -7,7 +7,7 @@ import type { GetCategoriesQueryDTO } from "../validations/category.validation.j
 import type { GetProductsQueryDTO } from "../validations/product.validation.js";
 
 export const categoryService = {
-    getAll: async (query: GetCategoriesQueryDTO): Promise<paginatedCategoriesResult> => {
+    getAll: async (query: GetCategoriesQueryDTO): Promise<paginatedCategoriesResponse> => {
         const {page, limit, skip} = parsePagination(query)
 
         const [categories, totalData] = await Promise.all([categoryRepository.findAll({...query, search: query.search, limit, offset: skip}), categoryRepository.countAll({...query, search: query.search, limit, offset: skip})])
@@ -22,7 +22,7 @@ export const categoryService = {
                 totalPages: totalPages,
                 hasNextPage: page < totalPages,
                 hasPrevPage: page > 1
-            }
+            } 
         }
     },
 

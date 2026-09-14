@@ -10,5 +10,7 @@ export const positivePriceSchema = z.number().positive("Harga harus lebih dari 0
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
-    sortOrder: z.string().toUpperCase().pipe(z.enum(SORTABLE_ORDER_VALUES)).default(SORTABLE_ORDER.ASC)
+    sortOrder: z.string().toUpperCase().pipe(z.enum(SORTABLE_ORDER_VALUES)).default(SORTABLE_ORDER.ASC),
+    cursor: z.coerce.number().int("Kursor harus bilangan bulat").min(1).default(10),
+    
 })
