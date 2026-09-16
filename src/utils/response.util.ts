@@ -1,5 +1,6 @@
-import type { ApiPaginationResponse, ApiResponse, CursorPaginationMeta, PaginationMeta } from "../types/api.type.js";
+import type { ApiPaginationResponse, ApiResponse} from "../types/api.type.js";
 import type { Response } from "express"
+import type { PaginationMeta, CursorPaginationMeta  } from "../types/pagination.type.js";
 
 export const sendResponse = <T>(res: Response, statusCode: number, message: string, data?: T): Response<ApiResponse<T>> => {
     return res.status(statusCode).json({

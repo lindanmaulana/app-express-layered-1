@@ -2,10 +2,21 @@ import type { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import type { Product } from "../models/product.model.js";
 import { adminProductService } from "../services/admin-product.service.js";
-import { sendResponse } from "../utils/response.util.js";
-import type { BulkDeleteProductsDTO, BulkRestockProductDTO, ChangePriceProductDTO, CreateProductDTO, ReduceStockProductDTO, RestockProductDTO, UpdateProductDTO } from "../validations/product.validation.js";
+import { sendPaginationResponse, sendResponse } from "../utils/response.util.js";
+import type { BulkDeleteProductsDTO, BulkRestockProductDTO, ChangePriceProductDTO, CreateProductDTO, ProductsCursorQueryDTO, ReduceStockProductDTO, RestockProductDTO, UpdateProductDTO } from "../validations/product.validation.js";
 
 export const adminProductController = {
+  getAllCursor: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payloadQuery = req.parsedQuery as ProductsCursorQueryDTO
+      const result = await adminProductService.getAllCursor(payloadQuery)
+
+      sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat data produk", result.data, result.meta)
+    } catch (err) {
+      next(err)
+    }
+  },
+
   getById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = Number(req.params.id);

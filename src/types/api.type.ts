@@ -1,11 +1,4 @@
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  totalData: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
+import type { CursorPaginationMeta, OpaqueCursor, PaginationMeta } from "./pagination.type.js";
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -20,49 +13,10 @@ export interface ApiPaginationResponse<T = unknown> {
     meta: PaginationMeta
 }
 
-export interface PaginationQuery {
-  page?: number | undefined
-  limit?: number | undefined
-  sortOrder?: string | undefined
-}
-
-export interface PaginationOptions {
-  page: number
-  limit: number
-  skip: number
-  take: number
-}
-
-export interface SortType {
-  asc: "ASC",
-  desc: "DESC"
-}
-
-
-
-
-
-
-export interface CursorPaginationMeta {
-  limit: number
-  hasNextPage: boolean
-  nextCursor?: string | number | null
-}
-
 export interface ApiCursorPaginationResponse<T = unknown> {
-  success: boolean
-  message: string
-  data: T[] | T
-  meta: CursorPaginationMeta
+  success: boolean;
+  message: string;
+  data: T[] | T;
+  meta: CursorPaginationMeta;
 }
 
-export interface CursorPaginationQuery {
-  limit?: number | undefined
-  sortOrder?: string | undefined
-  cursor?: string | number | undefined
-}
-
-export interface CursorPaginationOptions {
-  cursor?: string | number | undefined
-  limit: number
-}

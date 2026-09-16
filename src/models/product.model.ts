@@ -1,4 +1,4 @@
-import type { PaginationMeta } from "../types/api.type.js";
+import type { CursorPaginationMeta, CursorPaginationQuery2, OpaqueCursor, PaginationMeta } from "../types/pagination.type.js";
 
 export type Product = {
   id: number;
@@ -7,37 +7,37 @@ export type Product = {
   sku: string;
   price: number;
   stock: number;
-  created_at: Date;
+  created_at: string;
 };
 
-export type ProductResponse = Product;
 
-export type GetProductsQueryData = {
+
+
+
+
+
+
+
+export type GetProductsQueryData = CursorPaginationQuery2 & {
   search?: string | undefined;
   min_price?: number | undefined;
   max_price?: number | undefined;
 
   category_id?: number | undefined;
-  category_slug?: string | undefined
-
-  page?: number | undefined;
-  limit?: number | undefined;
+  category_slug?: string | undefined;
 };
 
-export type ProductFilterParams = Omit<GetProductsQueryData, "page"> & { offset?: number }
-
-export type PaginatedProductsResult = {
-  data: Product[];
-  meta: PaginationMeta;
-};
+export type ProductFilterParams = Omit<GetProductsQueryData, "page" | "cursor"> & {
+  cursor?: OpaqueCursor | undefined
+}
 
 export type CreateProductData = Omit<Product, "id" | "created_at"> & {
   stock?: number | undefined;
 };
 
 export type UpdateProductData = {
-  [K in keyof CreateProductData]?: Product[K] | undefined
-}
+  [K in keyof CreateProductData]?: Product[K] | undefined;
+};
 
 export type RestockProductData = {
   quantity: number;
@@ -58,4 +58,23 @@ export type ChangePriceProductData = {
 
 export type BulkDeleteProductsData = {
   ids: number[];
+};
+
+
+
+
+
+
+
+
+
+export type ProductResponse = Product;
+export type PaginatedProductsResponse = {
+  data: Product[];
+  meta: PaginationMeta;
+};
+
+export type PaginatedCursorProductsResponse = {
+  data: Product[]
+  meta: CursorPaginationMeta
 };

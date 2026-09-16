@@ -1,5 +1,5 @@
 import type { OrderStatus } from "../constants/order-status.constant.js"
-import type { PaginationMeta, PaginationQuery } from "../types/api.type.js"
+import type { PaginationMeta, PaginationQuery } from "../types/pagination.type.js"
 import type { OrderItem } from "./order_item.model.js"
 
 export type Order = {

@@ -1,5 +1,5 @@
 import type { UserRole } from "../constants/user-role.constant.js";
-import type { PaginationMeta } from "../types/api.type.js";
+import type { PaginationMeta } from "../types/pagination.type.js";
 
 export interface User {
   id: number;

@@ -4,7 +4,7 @@ import { validate } from "../middlewares/validate.js";
 import { idParamSchema } from "../validations/param.validation.js";
 import { authenticate, authorizeRoles } from "../middlewares/auth.middleware.js";
 import { USER_ROLE } from "../constants/user-role.constant.js";
-import { createProductSchema, reduceStockProductSchema, restockProductSchema } from "../validations/product.validation.js";
+import { createProductSchema, productsCursorQuerySchema, reduceStockProductSchema, restockProductSchema } from "../validations/product.validation.js";
 
 const router = Router()
 
@@ -12,6 +12,7 @@ const router = Router()
     router.patch("/bulk/restock", authenticate, authorizeRoles(USER_ROLE.ADMIN), adminProductController.bulkRestock);
     router.delete("/bulk", authenticate, authorizeRoles(USER_ROLE.ADMIN), adminProductController.bulkDelete);
 
+    router.get("/", validate({ query: productsCursorQuerySchema }), authenticate, authorizeRoles(USER_ROLE.ADMIN), adminProductController.getAllCursor)
     router.get("/:id", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({ params: idParamSchema }), adminProductController.getById);
     router.patch("/:id", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({ params: idParamSchema }), adminProductController.updateById);
     router.patch("/:id/change-price", authenticate, authorizeRoles(USER_ROLE.ADMIN), validate({ params: idParamSchema }), adminProductController.changePrice);

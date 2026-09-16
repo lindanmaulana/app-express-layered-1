@@ -6,19 +6,51 @@ import {
   NotFoundError,
 } from "../errors/index.js";
 
-import type { Product } from "../models/product.model.js";
+import type { PaginatedCursorProductsResponse, Product } from "../models/product.model.js";
 import { productRepository } from "../repositories/product.repository.js";
+import { encodeOpaqueCursor, parseCursorPagination2 } from "../utils/pagination.util.js";
 import type {
   BulkDeleteProductsDTO,
   BulkRestockProductDTO,
   ChangePriceProductDTO,
   CreateProductDTO,
+  ProductsCursorQueryDTO,
   ReduceStockProductDTO,
   RestockProductDTO,
   UpdateProductDTO,
 } from "../validations/product.validation.js";
 
 export const adminProductService = {
+  getAllCursor: async (query: ProductsCursorQueryDTO): Promise<PaginatedCursorProductsResponse> => {
+    const { cursor, limit } = parseCursorPagination2(query)
+    const fetchLimit = limit + 1
+
+    const products = await productRepository.findAllCursor({...query, limit: fetchLimit, cursor})
+    
+    let hasNextPage: boolean = products.length > limit
+    let nextCursor: string | null = null
+
+    if (hasNextPage) {
+      products.pop()
+      const lastItem = products[products.length - 1]
+
+      if (lastItem) {
+        const encodeCursor = encodeOpaqueCursor({ createdAt: lastItem.created_at, id: lastItem.id })
+        
+        nextCursor = encodeCursor
+      }
+    }
+
+    return {
+      data: products,
+      meta: {
+        limit,
+        hasNextPage,
+        nextCursor
+      }
+    }
+  },
+
   getById: async (id: number): Promise<Product> => {
     const result = await productRepository.findById(id);
 

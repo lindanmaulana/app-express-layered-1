@@ -20,6 +20,17 @@ export const getProductsQuerySchema = paginationQuerySchema.extend({
     category_id: idSchema.optional()
 })
 
+export const productsCursorQuerySchema = paginationQuerySchema.pick({
+    limit: true,
+    sortOrder: true
+}).extend({
+    cursor: z.string().trim().optional(),
+    search: z.string().trim().optional(),
+    min_price: z.coerce.number().positive("Harga minimal harus lebih dari 0").optional(),
+    max_price: z.coerce.number().positive("Harga maksimal harus lebih dari 0").optional(),
+    category_id: idSchema.optional()
+})
+
 export const createProductSchema = productSchema.pick({
     category_id: true,
     name: true,
@@ -61,6 +72,7 @@ export const bulkDeleteProductsSchema = z.object({
 export type ProductDTO = z.infer<typeof productSchema>
 
 export type GetProductsQueryDTO = z.infer<typeof getProductsQuerySchema>
+export type ProductsCursorQueryDTO = z.infer<typeof productsCursorQuerySchema>
 
 export type CreateProductDTO = z.infer<typeof createProductSchema>
 export type UpdateProductDTO = z.infer<typeof updateProductSchema>

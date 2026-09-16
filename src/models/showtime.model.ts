@@ -1,4 +1,4 @@
-import type { PaginationMeta, PaginationQuery, SortType } from "../types/api.type.js"
+import type { PaginationMeta, PaginationQuery, SortType } from "../types/pagination.type.js"
 
 export interface Showtime {
     id: number

@@ -29,16 +29,16 @@ export const categoryController = {
         }
     },
 
-    getByIdWithProducts: async ( req: Request, res: Response, next: NextFunction ) => {
-        try {
-            const id = Number(req.params.id)
-            const query = req.query as unknown as GetProductsQueryDTO
+    // getByIdWithProducts: async ( req: Request, res: Response, next: NextFunction ) => {
+    //     try {
+    //         const id = Number(req.params.id)
+    //         const query = req.query as unknown as GetProductsQueryDTO
 
-            const result = await categoryService.getByIdWithProducts(id, query)
+    //         const result = await categoryService.getByIdWithProducts(id, query)
 
-            sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat detail kategori beserta produk", result.data, result.meta)
-        } catch (err) {
-            next(err)
-        }
-    }
+    //         sendPaginationResponse(res, StatusCodes.OK, "Berhasil memuat detail kategori beserta produk", result.data, result.meta)
+    //     } catch (err) {
+    //         next(err)
+    //     }
+    // }
 };

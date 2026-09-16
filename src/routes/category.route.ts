@@ -11,6 +11,6 @@ const router = Router()
 
     router.get("/", authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), validate({ query: getCategoriesQuerySchema }), categoryController.getAll)
     router.get("/:slug", authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), validate({ params: slugParamSchema }), categoryController.getBySlug)
-    router.get("/:id/products", authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), validate({ params: idParamSchema, query: getProductsQuerySchema }), categoryController.getByIdWithProducts)
+    // router.get("/:id/products", authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), validate({ params: idParamSchema, query: getProductsQuerySchema }), categoryController.getByIdWithProducts)
 
 export default router

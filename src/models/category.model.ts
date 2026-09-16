@@ -1,5 +1,5 @@
 import type { SortableColumns } from "../constants/category.constant.js"
-import type { CursorPaginationMeta, CursorPaginationQuery, PaginationMeta, PaginationQuery } from "../types/api.type.js"
+import type { CursorPaginationMeta, CursorPaginationQuery, PaginationMeta, PaginationQuery } from "../types/pagination.type.js"
 import type { ProductResponse } from "./product.model.js"
 
 export type Category = {

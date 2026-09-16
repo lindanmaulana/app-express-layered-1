@@ -7,69 +7,102 @@ import type {
   ProductFilterParams,
   ReduceStockProductData,
   RestockProductData,
-  UpdateProductData
+  UpdateProductData,
 } from "../models/product.model.js";
+import { SORTABLE_ORDER } from "../constants/sort-order.constant.js";
 
 export const productRepository = {
-  buildWhereClause: (filters: ProductFilterParams) => {
+  buildWhereClause: (filters: ProductFilterParams, cursorOperator: "<" | ">") => {
     const conditions: string[] = [];
-    const params: (string | number | boolean)[] = [];
+    const values: (string | number | boolean)[] = [];
 
-    if (filters.search) {
-      params.push(`%${filters.search}%`);
-      conditions.push(`name ILIKE $${params.length}`);
+    if (filters.search !== undefined) {
+      values.push(`%${filters.search}%`);
+      conditions.push(`name ILIKE $${values.length}`);
     }
 
-    if (filters.min_price) {
-      params.push(filters.min_price);
-      conditions.push(`price >= $${params.length}`);
+    if (filters.min_price !== undefined) {
+      values.push(filters.min_price);
+      conditions.push(`price >= $${values.length}`);
     }
 
-    if (filters.max_price) {
-      params.push(filters.max_price);
-      conditions.push(`price <= $${params.length}`);
+    if (filters.max_price !== undefined) {
+      values.push(filters.max_price);
+      conditions.push(`price <= $${values.length}`);
     }
 
-    if (filters.category_id) {
-      params.push(filters.category_id)
-      conditions.push(` category_id = $${params.length}`)
+    if (filters.category_id !== undefined) {
+      values.push(filters.category_id);
+      conditions.push(` category_id = $${values.length}`);
+    }
+
+    if (filters.cursor && filters.cursor.createdAt && filters.cursor.id) {
+      values.push(filters.cursor.createdAt)
+      values.push(filters.cursor.id)
+
+      conditions.push(` (created_at, id) ${cursorOperator} ($${values.length - 1}::timestamptz, $${values.length}::integer) `)
     }
 
     const whereSQL =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    return { whereSQL, params };
+    return { whereSQL, values };
   },
 
-  findAll: async (filters: ProductFilterParams): Promise<Product[]> => {
-    const { whereSQL, params } = productRepository.buildWhereClause(filters);
-    const queryParams = [...params];
+  // findAll: async (filters: ProductFilterParams): Promise<Product[]> => {
+  //   const { whereSQL, values } = productRepository.buildWhereClause(filters);
+  //   const queryParams = [...values];
 
-    let paginationClause = "";
-    if (filters.limit) {
-      queryParams.push(filters.limit);
-      paginationClause += ` LIMIT $${queryParams.length}`;
+  //   let paginationClause = "";
+  //   if (filters.limit) {
+  //     queryParams.push(filters.limit);
+  //     paginationClause += ` LIMIT $${queryParams.length}`;
+  //   }
+
+  //   if (filters.offset) {
+  //     queryParams.push(filters.offset);
+  //     paginationClause += ` OFFSET $${queryParams.length}`;
+  //   }
+
+  //   const query = `SELECT id, name, sku, price, stock, created_at FROM products ${whereSQL} ORDER BY id DESC ${paginationClause}`;
+  //   const result = await pool.query<Product>(query, queryParams);
+
+  //   return result.rows;
+  // },
+
+  findAllCursor: async (filters: ProductFilterParams): Promise<Product[]> => {
+    const sortOrder =
+      filters.sortOrder?.toUpperCase() === SORTABLE_ORDER.DESC
+        ? SORTABLE_ORDER.DESC
+        : SORTABLE_ORDER.ASC;
+
+    const cursorOperator: "<" | ">" = sortOrder === SORTABLE_ORDER.DESC ? "<" : ">"
+
+    const { whereSQL, values } = productRepository.buildWhereClause(filters, cursorOperator);
+    const queryValues = [...values];
+
+    const sortClause = ` ORDER BY created_at ${sortOrder}, id ${sortOrder}`;
+
+    let limitClause = "";
+    if (filters.limit !== undefined) {
+      queryValues.push(filters.limit);
+      limitClause += ` LIMIT $${queryValues.length}`;
     }
 
-    if (filters.offset) {
-      queryParams.push(filters.offset);
-      paginationClause += ` OFFSET $${queryParams.length}`;
-    }
+    const query = `SELECT id, name, sku, price, stock, created_at::TEXT AS created_at, updated_at FROM products ${whereSQL} ${sortClause} ${limitClause} `;
+    const result = await pool.query<Product>(query, queryValues)
 
-    const query = `SELECT id, name, sku, price, stock, created_at FROM products ${whereSQL} ORDER BY id DESC ${paginationClause}`;
-    const result = await pool.query<Product>(query, queryParams);
-
-    return result.rows;
+    return result.rows
   },
 
-  countAll: async (filters: ProductFilterParams): Promise<number> => {
-    const { whereSQL, params } = productRepository.buildWhereClause(filters);
+  // countAll: async (filters: ProductFilterParams): Promise<number> => {
+  //   const { whereSQL, values } = productRepository.buildWhereClause(filters);
 
-    const query = `SELECT COUNT(id) AS total FROM products ${whereSQL}`;
-    const result = await pool.query(query, params);
+  //   const query = `SELECT COUNT(id) AS total FROM products ${whereSQL}`;
+  //   const result = await pool.query(query, values);
 
-    return parseInt(result.rows[0].total ?? "0", 10);
-  },
+  //   return parseInt(result.rows[0].total ?? "0", 10);
+  // },
 
   findById: async (id: number): Promise<Product | null> => {
     const query =
@@ -120,7 +153,7 @@ export const productRepository = {
   create: async (data: CreateProductData): Promise<Product> => {
     const query =
       "INSERT INTO products (category_id, name, sku, price, stock) VALUES ($1, $2, $3, $4, $5) RETURNING *";
-    
+
     const result = await pool.query<Product>(query, [
       data.category_id,
       data.name,
@@ -179,6 +212,15 @@ export const productRepository = {
     return (result.rowCount ?? 0) > 0;
   },
 
+  decrementManyStock: async (ids: number[], quantities: number[]): Promise<boolean> => {
+    const query = "UPDATE products AS p SET stock = p.stock - v.quantity, updated_at = NOW() FROM UNNEST($1::integer[], $2::integer[]) AS v(id, quantity) WHERE p.id = v.id"
+    const values = [ids, quantities]
+
+    const result = await pool.query(query, values)
+
+    return result.rowCount === ids.length
+  },
+
   deleteById: async (id: number): Promise<boolean> => {
     const query = "DELETE FROM products WHERE id = $1";
     const result = await pool.query<Product>(query, [id]);
@@ -193,17 +235,21 @@ export const productRepository = {
     return result.rowCount ?? 0;
   },
 
-  findByIdWithLock: async (id: number, client: PoolClient): Promise<Product | null> => {
-    const query = "SELECT id, category_id, name, sku, price, stock, created_at FROM products WHERE id = $1 FOR UPDATE"
-    const result = await client.query<Product>(query, [id])
+  findByIdWithLock: async (
+    id: number,
+    client: PoolClient,
+  ): Promise<Product | null> => {
+    const query =
+      "SELECT id, category_id, name, sku, price, stock, created_at FROM products WHERE id = $1 FOR UPDATE";
+    const result = await client.query<Product>(query, [id]);
 
-    return result.rows[0] ?? null
+    return result.rows[0] ?? null;
   },
 
   incrementStockWithTrx: async (
     id: number,
     dto: RestockProductData,
-    client: PoolClient
+    client: PoolClient,
   ): Promise<boolean> => {
     const query = "UPDATE products SET stock = stock + $1 WHERE id = $2";
     const result = await client.query<Product>(query, [dto.quantity, id]);
@@ -214,7 +260,7 @@ export const productRepository = {
   decrementStockWithTrx: async (
     id: number,
     dto: ReduceStockProductData,
-    client: PoolClient
+    client: PoolClient,
   ): Promise<boolean> => {
     const query = "UPDATE products SET stock = stock - $1 WHERE id = $2";
     const result = await client.query<Product>(query, [dto.quantity, id]);

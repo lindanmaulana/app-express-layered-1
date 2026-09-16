@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX idx_categories_name ON categories USING gin (name gin_trgm_ops);
 
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
