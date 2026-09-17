@@ -30,11 +30,14 @@ CREATE TABLE IF NOT EXISTS products (
     price NUMERIC(12, 2) NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     image_url VARCHAR(255) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
-    ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+    CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 )
+
+CREATE INDEX idx_products_created_at ON products (created_at DESC)
+CREATE INDEX idx_products_name ON products USING gin (name gin_trgm_ops)
 
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,

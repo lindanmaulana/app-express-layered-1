@@ -3,7 +3,7 @@ import pool from "../config/db.js";
 import { ORDER_STATUS, ORDER_STATUS_LABEL } from "../constants/order-status.constant.js";
 import { BadRequestError, InternalServerError } from "../errors/index.js";
 import { NotFoundError } from "../errors/not-found.js";
-import type { GetUserOrdersWithOrderItemsResponse, OrderResponse, OrderWithOrderItems } from "../models/order.model.js";
+import type { GetUserOrdersWithOrderItemsResponse, OrderResponse, OrderWithOrderItems, ValidOrderItem } from "../models/order.model.js";
 import { orderItemRepository } from "../repositories/order-item.repository.js";
 import { orderRepository } from "../repositories/order.repository.js";
 import { productRepository } from "../repositories/product.repository.js";
@@ -57,6 +57,7 @@ export const orderService = {
         if (!dto.items || dto.items.length === 0) throw new BadRequestError("Pesanan tidak boleh kosong")
 
         let totalPrice: number = 0
+        let orderItems: ValidOrderItem[] = []
         for(const item of dto.items) {
             const checkProduct = await productRepository.findById(item.product_id)
             if (!checkProduct) throw new NotFoundError(`Produk dengan ID ${item.product_id} tidak ditemukan`)
@@ -64,6 +65,7 @@ export const orderService = {
             if (checkProduct.stock < item.quantity) throw new BadRequestError(`Stok produk ${checkProduct.name} tidak cukup, sisa ${checkProduct.stock} stok lagi`)
 
             totalPrice += checkProduct.price * item.quantity
+            orderItems.push({ product_id: checkProduct.id, product_price: checkProduct.price, quantity: item.quantity })
         }
 
         const newUuid = uuidv4()
@@ -72,7 +74,7 @@ export const orderService = {
             await client.query("BEGIN")
 
             const result = await orderRepository.createWithTrx({user_id: user.userId, total_amount: totalPrice, idempotency_key: newUuid}, client)
-            for (const item of dto.items) {
+            for (const item of orderItems) {
                 await orderItemRepository.createWithTrx({order_id: result.id, product_id: item.product_id, quantity: item.quantity, price_at_purchase: item.product_price}, client)
 
                 await productRepository.decrementStockWithTrx(item.product_id, {quantity: item.quantity}, client)
@@ -133,17 +135,20 @@ export const orderService = {
             await client.query('BEGIN')
 
                 let totalPrice: number = 0
+                let orderItems: ValidOrderItem[] = []
+
                 for (const item of dto.items) {
                     const checkProduct = await productRepository.findByIdWithLock(item.product_id, client)
                     if (!checkProduct) throw new NotFoundError(`Produk dengan ID ${item.product_id} tidak ditemukan`)
 
                     if (checkProduct.stock < item.quantity) throw new BadRequestError(`Stok produk ${checkProduct.name} tidak cukup, sisa ${checkProduct.stock} stok lagi`)
 
-                        totalPrice += checkProduct.price * item.quantity
+                    totalPrice += checkProduct.price * item.quantity
+                    orderItems.push({product_id: checkProduct.id, product_price: checkProduct.price, quantity: item.quantity})
                 }
 
                 const newOrder = await orderRepository.createWithTrx({user_id: user.userId, total_amount: totalPrice, idempotency_key: newUuid}, client)
-                for (const item of dto.items) {
+                for (const item of orderItems) {
                     await orderItemRepository.createWithTrx({order_id: newOrder.id, product_id: item.product_id, quantity: item.quantity, price_at_purchase: item.product_price}, client)
 
                     await productRepository.decrementStockWithTrx(item.product_id, { quantity: item.quantity }, client)

@@ -186,21 +186,21 @@ export const orderPlaygroundService = {
         }
     },
 
-    createWithIdempotencyAndLock: async (user: JwtPayload, idempotencyKey: string, dto: CreateOrderDTO): Promise<OrderResponse> => {
-        const checkUser = await userRepository.findById(user.userId)
-        if (!checkUser) throw new NotFoundError("Pengguna tidak ditemukan")
+    // createWithIdempotencyAndLock: async (user: JwtPayload, idempotencyKey: string, dto: CreateOrderDTO): Promise<OrderResponse> => {
+    //     const checkUser = await userRepository.findById(user.userId)
+    //     if (!checkUser) throw new NotFoundError("Pengguna tidak ditemukan")
 
-        // COMING SOON IMPLEMENT IDEMPOTENCY KEY & ROW LEVEL LOCKING
+    //     // COMING SOON IMPLEMENT IDEMPOTENCY KEY & ROW LEVEL LOCKING
         
-        const client = await pool.connect()
-        try {
-            await client.query('BEGIN')
+    //     const client = await pool.connect()
+    //     try {
+    //         await client.query('BEGIN')
 
-            await client.query("COMMIT")
-        } catch (err) {
-            await client.query("ROLLBACK")
-        } finally {
-            client.release()
-        }
-    },
+    //         await client.query("COMMIT")
+    //     } catch (err) {
+    //         await client.query("ROLLBACK")
+    //     } finally {
+    //         client.release()
+    //     }
+    // },
 }

@@ -1,8 +1,8 @@
 import type { PoolClient } from "pg";
 import pool from "../config/db.js";
-import type { CreateShowtimeData, Showtime, ShowtimeFilterParams, UpdateShotimeData } from "../models/showtime.model.js";
-import type { SortType } from "../types/api.type.js";
 import { SORTABLE_COLUMNS } from "../constants/showtime.constant.js";
+import type { CreateShowtimeData, Showtime, ShowtimeFilterParams, ShowtimeWithSeats, UpdateShotimeData } from "../models/showtime.model.js";
+import type { SortType } from "../types/pagination.type.js";
 
 export const showtimeRepository = {
     buildWhereClause: (filters: ShowtimeFilterParams): { whereSQL: string, values: (string | SortType | number)[] } => {
@@ -65,6 +65,15 @@ export const showtimeRepository = {
         const values = [id]
 
         const result = await pool.query<Showtime>(query, values)
+
+        return result.rows[0] ?? null
+    },
+
+    findByIdWithSeats: async (id: number): Promise<ShowtimeWithSeats | null> => {
+        const query = "SELECT s.id, s.movie_title, s.studio_name, s.broadcast_time, COALESCE(JSON_AGG(JSON_BUILD_OBJECT('id', st.id, 'showtime_id', st.showtime_id, 'seat_number', st.seat_number, 'status', st.status)) FILTER (WHERE st.id IS NOT NULL), '[]'::json) AS seats FROM showtimes s LEFT JOIN seats st ON s.id = st.showtime_id WHERE s.id = $1 GROUP BY s.id, s.movie_title, s.studio_name, s.broadcast_time";
+        const values = [id]
+
+        const result = await pool.query(query, values)
 
         return result.rows[0] ?? null
     },

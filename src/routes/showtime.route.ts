@@ -10,5 +10,6 @@ const router = Router()
 
     router.get("/", validate({ query: getShowtimesQuerySchema }), authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), showtimeController.getAll)
     router.get("/:id", validate({ params: idParamSchema }), authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), showtimeController.getById)
+    router.get("/:id/seats", validate({ params: idParamSchema }), authenticate, authorizeRoles(USER_ROLE.ADMIN, USER_ROLE.USER), showtimeController.getByIdWithSeats)
 
 export default router

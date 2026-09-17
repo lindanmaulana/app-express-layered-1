@@ -26,5 +26,17 @@ export const showtimeController = {
         } catch (err) {
             next(err)
         }
-    }
+    },
+
+    getByIdWithSeats: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = Number(req.params.id)
+            
+            const result = await showtimeService.getByIdWithSeats(id)
+
+            sendResponse(res, StatusCodes.OK, "Berhasil memuat detail film", result)
+        } catch (err) {
+            next(err)
+        }
+    },
 }

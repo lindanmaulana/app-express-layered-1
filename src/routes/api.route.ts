@@ -7,6 +7,7 @@ import userRoutes from "./user.routes.js";
 import orderRoutes from "./order.route.js";
 import orderItemRoutes from "./order-item.route.js"
 import showtimeRoutes from "./showtime.route.js"
+import seatRoutes from "./seat.route.js"
 
 import adminCategoryRoutes from "./admin-category.route.js";
 import adminProductRoutes from "./admin-product.route.js";
@@ -33,6 +34,7 @@ const apiRouter = Router()
     apiRouter.use("/orders", orderRoutes)
     apiRouter.use("/order-items", orderItemRoutes)
     apiRouter.use("/showtimes", showtimeRoutes)
+    apiRouter.use("/seats", seatRoutes)
 
 
     apiRouter.use("/order-playgrounds", orderPlaygroundRoutes)

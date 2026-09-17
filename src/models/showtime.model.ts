@@ -1,4 +1,5 @@
 import type { PaginationMeta, PaginationQuery, SortType } from "../types/pagination.type.js"
+import type { Seat } from "./seat.model.js"
 
 export interface Showtime {
     id: number
@@ -10,6 +11,15 @@ export interface Showtime {
 }
 
 
+export interface ShowtimeWithSeats {
+    id: number
+    movie_title: string
+    studio_name: string
+    broadcast_time: string
+    created_at: string
+    updated_at: string
+    seats: Seat[] | []
+}
 
 
 
@@ -33,6 +43,10 @@ export type UpdateShotimeData = {
 
 
 export type ShowtimeResponse = Showtime
+export type ShowtimeWithSeatsResponse = Showtime & {
+    seats: Seat[] | []
+}
+
 export type paginatedShowtimesResult = {
     data: Showtime[]
     meta: PaginationMeta
